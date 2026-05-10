@@ -1,0 +1,64 @@
+# docker-compose.override.yml — Local development overrides
+# Automatically merged by docker-compose when present.
+# Enables hot-reload for all services without a full rebuild.
+
+version: '3.8'
+
+services:
+  # ── Node.js backend services ──────────────────────────────────────────────────
+  auth-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/auth-service/src:/app/src
+    command: ["npx", "nodemon", "src/index.js"]
+
+  profile-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/profile-service/src:/app/src
+    command: ["npx", "nodemon", "src/index.js"]
+
+  scheduler-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/scheduler-service/src:/app/src
+    command: ["npx", "nodemon", "src/index.js"]
+
+  quiz-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/quiz-service/src:/app/src
+    command: ["npx", "nodemon", "src/index.js"]
+
+  reward-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/reward-service/src:/app/src
+    command: ["npx", "nodemon", "src/index.js"]
+
+  stress-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/stress-service/src:/app/src
+    command: ["npx", "nodemon", "src/index.js"]
+
+  notification-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./backend/notification-service/src:/app/src
+    command: ["npx", "nodemon", "src/index.js"]
+
+  # ── AI Engine (Python FastAPI) ────────────────────────────────────────────────
+  ai-engine:
+    environment:
+      - ENV=development
+    volumes:
+      - ./ai-engine:/app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

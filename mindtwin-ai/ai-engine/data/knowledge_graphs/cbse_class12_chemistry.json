@@ -1,0 +1,133 @@
+{
+  "subject": "Chemistry",
+  "board": "CBSE",
+  "grade": "Class 12",
+  "topics": [
+    {
+      "id": "chem_12_cbse_001",
+      "name": "The Solid State",
+      "prerequisites": [],
+      "weightage_percent": 5,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "chem_12_cbse_002",
+      "name": "Solutions",
+      "prerequisites": [],
+      "weightage_percent": 7,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_003",
+      "name": "Electrochemistry",
+      "prerequisites": ["chem_12_cbse_002"],
+      "weightage_percent": 9,
+      "estimated_hours": 11,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_004",
+      "name": "Chemical Kinetics",
+      "prerequisites": [],
+      "weightage_percent": 7,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_005",
+      "name": "Surface Chemistry",
+      "prerequisites": ["chem_12_cbse_004"],
+      "weightage_percent": 5,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "chem_12_cbse_006",
+      "name": "General Principles of Isolation of Elements",
+      "prerequisites": [],
+      "weightage_percent": 4,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "chem_12_cbse_007",
+      "name": "p-Block Elements",
+      "prerequisites": ["chem_12_cbse_006"],
+      "weightage_percent": 8,
+      "estimated_hours": 12,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_008",
+      "name": "d and f Block Elements",
+      "prerequisites": ["chem_12_cbse_006"],
+      "weightage_percent": 5,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "chem_12_cbse_009",
+      "name": "Coordination Compounds",
+      "prerequisites": ["chem_12_cbse_008"],
+      "weightage_percent": 7,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_010",
+      "name": "Haloalkanes and Haloarenes",
+      "prerequisites": [],
+      "weightage_percent": 6,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_011",
+      "name": "Alcohols Phenols and Ethers",
+      "prerequisites": ["chem_12_cbse_010"],
+      "weightage_percent": 6,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_012",
+      "name": "Aldehydes Ketones and Carboxylic Acids",
+      "prerequisites": ["chem_12_cbse_011"],
+      "weightage_percent": 8,
+      "estimated_hours": 11,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_013",
+      "name": "Amines",
+      "prerequisites": ["chem_12_cbse_011"],
+      "weightage_percent": 6,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "chem_12_cbse_014",
+      "name": "Biomolecules",
+      "prerequisites": [],
+      "weightage_percent": 4,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    }
+  ]
+}

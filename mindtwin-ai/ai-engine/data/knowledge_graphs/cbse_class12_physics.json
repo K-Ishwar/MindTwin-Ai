@@ -1,0 +1,133 @@
+{
+  "subject": "Physics",
+  "board": "CBSE",
+  "grade": "Class 12",
+  "topics": [
+    {
+      "id": "phy_12_cbse_001",
+      "name": "Electric Charges and Fields",
+      "prerequisites": [],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_002",
+      "name": "Electrostatic Potential",
+      "prerequisites": ["phy_12_cbse_001"],
+      "weightage_percent": 7,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_003",
+      "name": "Current Electricity",
+      "prerequisites": ["phy_12_cbse_002"],
+      "weightage_percent": 7,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_004",
+      "name": "Moving Charges and Magnetism",
+      "prerequisites": ["phy_12_cbse_003"],
+      "weightage_percent": 6,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_005",
+      "name": "Magnetism and Matter",
+      "prerequisites": ["phy_12_cbse_004"],
+      "weightage_percent": 4,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_12_cbse_006",
+      "name": "Electromagnetic Induction",
+      "prerequisites": ["phy_12_cbse_004"],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_007",
+      "name": "Alternating Current",
+      "prerequisites": ["phy_12_cbse_006"],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_008",
+      "name": "Electromagnetic Waves",
+      "prerequisites": ["phy_12_cbse_007"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_12_cbse_009",
+      "name": "Ray Optics",
+      "prerequisites": [],
+      "weightage_percent": 10,
+      "estimated_hours": 12,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_010",
+      "name": "Wave Optics",
+      "prerequisites": ["phy_12_cbse_009"],
+      "weightage_percent": 7,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_12_cbse_011",
+      "name": "Dual Nature of Radiation",
+      "prerequisites": ["phy_12_cbse_008"],
+      "weightage_percent": 5,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_12_cbse_012",
+      "name": "Atoms",
+      "prerequisites": ["phy_12_cbse_011"],
+      "weightage_percent": 4,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_12_cbse_013",
+      "name": "Nuclei",
+      "prerequisites": ["phy_12_cbse_012"],
+      "weightage_percent": 4,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_12_cbse_014",
+      "name": "Semiconductor Electronics",
+      "prerequisites": ["phy_12_cbse_011"],
+      "weightage_percent": 7,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    }
+  ]
+}

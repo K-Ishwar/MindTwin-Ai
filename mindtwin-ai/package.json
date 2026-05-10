@@ -1,0 +1,14 @@
+{
+  "name": "mindtwin-ai",
+  "version": "1.0.0",
+  "scripts": {
+    "migrate": "node backend/database/run_migrations.js",
+    "test:onboarding": "node scripts/test_onboarding.js",
+    "test:phase3": "node scripts/test_phase3.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.5",
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.3"
+  }
+}

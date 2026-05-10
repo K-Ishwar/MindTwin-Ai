@@ -1,0 +1,115 @@
+{
+  "subject": "Mathematics",
+  "board": "CBSE",
+  "grade": "Class 12",
+  "topics": [
+    {
+      "id": "math_12_cbse_001",
+      "name": "Relations and Inverse Trigonometric Functions",
+      "prerequisites": [],
+      "weightage_percent": 8,
+      "estimated_hours": 12,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_002",
+      "name": "Matrices",
+      "prerequisites": [],
+      "weightage_percent": 9,
+      "estimated_hours": 10,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_003",
+      "name": "Determinants",
+      "prerequisites": ["math_12_cbse_002"],
+      "weightage_percent": 9,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_004",
+      "name": "Continuity and Differentiability",
+      "prerequisites": [],
+      "weightage_percent": 10,
+      "estimated_hours": 14,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_005",
+      "name": "Applications of Derivatives",
+      "prerequisites": ["math_12_cbse_004"],
+      "weightage_percent": 10,
+      "estimated_hours": 12,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_006",
+      "name": "Integrals",
+      "prerequisites": ["math_12_cbse_004"],
+      "weightage_percent": 11,
+      "estimated_hours": 16,
+      "difficulty_level": 5,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_007",
+      "name": "Applications of Integrals",
+      "prerequisites": ["math_12_cbse_006"],
+      "weightage_percent": 6,
+      "estimated_hours": 8,
+      "difficulty_level": 4,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_12_cbse_008",
+      "name": "Differential Equations",
+      "prerequisites": ["math_12_cbse_006"],
+      "weightage_percent": 7,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_009",
+      "name": "Vector Algebra",
+      "prerequisites": [],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_010",
+      "name": "Three Dimensional Geometry",
+      "prerequisites": ["math_12_cbse_009"],
+      "weightage_percent": 10,
+      "estimated_hours": 12,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_12_cbse_011",
+      "name": "Linear Programming",
+      "prerequisites": [],
+      "weightage_percent": 6,
+      "estimated_hours": 7,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_12_cbse_012",
+      "name": "Probability",
+      "prerequisites": [],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    }
+  ]
+}

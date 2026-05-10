@@ -1,0 +1,16 @@
+/* Tailwind v4 — no @tailwind directives needed, handled by @tailwindcss/postcss */
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #0F172A;
+    color: white;
+    -webkit-font-smoothing: antialiased;
+  }
+}
