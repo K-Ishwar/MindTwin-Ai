@@ -1,68 +1,51 @@
+'use strict';
+
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
 const authController = require('../controllers/authController');
 const {
   validateRequest,
   registerValidation,
   loginValidation,
   refreshValidation,
-<<<<<<< HEAD
-  otpValidation,
-=======
   guardianRegisterValidation,
   guardianLoginValidation,
   updateGuardianValidation,
-  linkStudentValidation
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
+  linkStudentValidation,
 } = require('../middleware/validateRequest');
-const auth = require('../middleware/auth');
 const { verifyStudentAuth, verifyGuardianAuth } = require('../middleware/auth');
+const auth = require('../middleware/auth');   // verifyAnyAuth (default export)
 
-<<<<<<< HEAD
-router.post('/register',             registerValidation, validateRequest, authController.register);
-router.post('/login',                loginValidation,    validateRequest, authController.login);
-router.post('/refresh',              refreshValidation,  validateRequest, authController.refreshToken);
-router.post('/logout',               auth, authController.logout);
-router.get('/me',                    auth, authController.getMe);
-
-// Email verification
-router.post('/verify-email',         auth, otpValidation, validateRequest, authController.verifyEmail);
-router.post('/resend-verification',  auth, authController.resendVerification);
-=======
-// ─── Student routes ───────────────────────────────────────────────────────────
+// ── Student routes ────────────────────────────────────────────────────────────
 router.post('/register',  registerValidation,  validateRequest, authController.register);
 router.post('/login',     loginValidation,     validateRequest, authController.login);
 router.post('/refresh',   refreshValidation,   validateRequest, authController.refreshToken);
 router.post('/logout',    auth,                                 authController.logout);
 router.get('/me',         verifyStudentAuth,                    authController.getMe);
 
-// Student sees all guardian requests addressed to them (pending + history)
+// Email verification
+router.post('/verify-email',        verifyStudentAuth, authController.verifyEmail);
+router.post('/resend-verification', verifyStudentAuth, authController.resendVerification);
+
+// Student sees all guardian requests addressed to them
 router.get('/student/guardian-requests', verifyStudentAuth, authController.studentGetGuardianRequests);
 
-// ─── Guardian routes ──────────────────────────────────────────────────────────
-
-// Auth
+// ── Guardian routes ───────────────────────────────────────────────────────────
 router.post('/guardian/register', guardianRegisterValidation, validateRequest, authController.guardianRegister);
 router.post('/guardian/login',    guardianLoginValidation,    validateRequest, authController.guardianLogin);
 
-// Guardian profile — view & update own account
-router.get('/guardian/me',  verifyGuardianAuth,                                         authController.guardianGetMe);
+router.get('/guardian/me',  verifyGuardianAuth,                                           authController.guardianGetMe);
 router.put('/guardian/me',  verifyGuardianAuth, updateGuardianValidation, validateRequest, authController.guardianUpdateMe);
 
-// Links — guardian initiates; student approves/rejects
-router.post('/guardian/link-student',          verifyGuardianAuth, linkStudentValidation, validateRequest, authController.linkStudent);
-router.post('/guardian/approve-link/:linkId',  verifyStudentAuth,                         authController.approveLink);
-router.post('/guardian/reject-link/:linkId',   verifyStudentAuth,                         authController.rejectLink);
+router.post('/guardian/link-student',         verifyGuardianAuth, linkStudentValidation, validateRequest, authController.linkStudent);
+router.post('/guardian/approve-link/:linkId', verifyStudentAuth,                          authController.approveLink);
+router.post('/guardian/reject-link/:linkId',  verifyStudentAuth,                          authController.rejectLink);
 
-// Guardian views pending (awaiting student approval) and removes a link
-router.get('/guardian/pending-links',          verifyGuardianAuth, authController.guardianPendingLinks);
-router.delete('/guardian/link/:linkId',        verifyGuardianAuth, authController.guardianUnlinkStudent);
+router.get('/guardian/pending-links',  verifyGuardianAuth, authController.guardianPendingLinks);
+router.delete('/guardian/link/:linkId',verifyGuardianAuth, authController.guardianUnlinkStudent);
+router.get('/guardian/students',       verifyGuardianAuth, authController.getMyStudents);
 
-// Guardian views approved linked students
-router.get('/guardian/students', verifyGuardianAuth, authController.getMyStudents);
-
-// ─── Admin routes ─────────────────────────────────────────────────────────────
+// ── Admin routes ──────────────────────────────────────────────────────────────
 router.post('/admin/login', authController.adminLogin);
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
 module.exports = router;

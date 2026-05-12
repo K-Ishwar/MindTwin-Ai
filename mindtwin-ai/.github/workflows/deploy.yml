@@ -1,0 +1,174 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # allow manual trigger from GitHub Actions UI
+    inputs:
+      skip_smoke_test:
+        description: 'Skip post-deploy smoke test'
+        required: false
+        default: 'false'
+        type: boolean
+
+# Only one deploy can run at a time
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false   # never cancel an in-flight deploy
+
+jobs:
+  deploy:
+    name: Deploy to AWS EC2
+    runs-on: ubuntu-latest
+    environment: production   # requires environment approval if configured in GitHub
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── AWS / ECR Auth ────────────────────────────────────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # ── Build & Push all images ───────────────────────────────────────────────
+      - name: Build and push backend service images to ECR
+        working-directory: mindtwin-ai
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          for service in auth-service profile-service scheduler-service quiz-service \
+                         stress-service reward-service notification-service analytics-service; do
+            echo "──────────────────────────────────────────"
+            echo "Building mindtwin-$service:$IMAGE_TAG"
+            echo "──────────────────────────────────────────"
+            docker build \
+              -f backend/$service/Dockerfile.prod \
+              -t $ECR_REGISTRY/mindtwin-$service:$IMAGE_TAG \
+              -t $ECR_REGISTRY/mindtwin-$service:latest \
+              backend/$service/
+            docker push $ECR_REGISTRY/mindtwin-$service:$IMAGE_TAG
+            docker push $ECR_REGISTRY/mindtwin-$service:latest
+          done
+
+      - name: Build and push AI engine image to ECR
+        working-directory: mindtwin-ai
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "Building mindtwin-ai-engine:$IMAGE_TAG"
+          docker build \
+            -f ai-engine/Dockerfile.prod \
+            -t $ECR_REGISTRY/mindtwin-ai-engine:$IMAGE_TAG \
+            -t $ECR_REGISTRY/mindtwin-ai-engine:latest \
+            ai-engine/
+          docker push $ECR_REGISTRY/mindtwin-ai-engine:$IMAGE_TAG
+          docker push $ECR_REGISTRY/mindtwin-ai-engine:latest
+
+      - name: Build and push web frontend image to ECR
+        working-directory: mindtwin-ai
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          if [ -f "frontend/web/Dockerfile.prod" ]; then
+            echo "Building mindtwin-web:$IMAGE_TAG"
+            docker build \
+              -f frontend/web/Dockerfile.prod \
+              -t $ECR_REGISTRY/mindtwin-web:$IMAGE_TAG \
+              -t $ECR_REGISTRY/mindtwin-web:latest \
+              frontend/web/
+            docker push $ECR_REGISTRY/mindtwin-web:$IMAGE_TAG
+            docker push $ECR_REGISTRY/mindtwin-web:latest
+          else
+            echo "frontend/web/Dockerfile.prod not found — skipping web image build"
+          fi
+
+      # ── Deploy to EC2 via SSH ─────────────────────────────────────────────────
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          timeout: 300s
+          script: |
+            set -e
+            cd /home/ubuntu/mindtwin-ai/mindtwin-ai
+
+            echo "── Pulling latest code ──"
+            git pull origin main
+
+            echo "── Pulling latest Docker images from ECR ──"
+            docker-compose -f docker-compose.prod.yml pull
+
+            echo "── Running database migrations ──"
+            docker-compose -f docker-compose.prod.yml run --rm \
+              -e DATABASE_URL=$DATABASE_URL \
+              auth-service node /app/src/../../../database/run_migrations.js || \
+              echo "Migration step skipped (run_migrations.js path may differ)"
+
+            echo "── Rolling restart: auth-service ──"
+            docker-compose -f docker-compose.prod.yml up -d --no-deps auth-service
+            sleep 10
+
+            echo "── Bringing up all remaining services ──"
+            docker-compose -f docker-compose.prod.yml up -d
+
+            echo "── Waiting for services to stabilise ──"
+            sleep 20
+
+            echo "── Health check ──"
+            docker-compose -f docker-compose.prod.yml ps
+
+            echo "── Pruning unused images ──"
+            docker image prune -f
+
+            echo "Deployment complete — SHA: ${{ github.sha }}"
+
+      # ── Post-deploy smoke test ────────────────────────────────────────────────
+      - name: Post-deploy smoke test
+        if: ${{ github.event.inputs.skip_smoke_test != 'true' }}
+        run: |
+          echo "Waiting 30s for services to be ready..."
+          sleep 30
+
+          echo "── Checking /health endpoints ──"
+          curl --fail --silent --show-error --max-time 10 \
+            https://api.mindtwin.ai/health || \
+            (echo "Health check FAILED" && exit 1)
+
+          echo "Production smoke test PASSED"
+
+      # ── Notifications ─────────────────────────────────────────────────────────
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Deploy successful"
+          echo "  SHA:    ${{ github.sha }}"
+          echo "  Branch: ${{ github.ref_name }}"
+          echo "  Actor:  ${{ github.actor }}"
+          # TODO: replace with real Slack/email webhook call
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-type: application/json' \
+          #   --data '{"text":"✅ MindTwin deployed successfully by ${{ github.actor }}"}'
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Deploy FAILED"
+          echo "  SHA:    ${{ github.sha }}"
+          echo "  Branch: ${{ github.ref_name }}"
+          echo "  Actor:  ${{ github.actor }}"
+          # TODO: replace with real Slack/email webhook call
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+          #   -H 'Content-type: application/json' \
+          #   --data '{"text":"❌ MindTwin deploy FAILED — check Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'

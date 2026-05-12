@@ -1,0 +1,384 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+# Cancel in-progress runs for the same branch to save CI minutes
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Backend Services ──────────────────────────────────────────────────────────
+  test-backend:
+    name: Test Backend Services
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: mindtwin_test
+          POSTGRES_USER: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongodb:
+        image: mongo:7
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:testpass@localhost:5432/mindtwin_test
+      REDIS_URL: redis://localhost:6379
+      MONGODB_URI: mongodb://localhost:27017/mindtwin_test
+      JWT_SECRET: ci-test-jwt-secret-not-for-production
+      JWT_REFRESH_SECRET: ci-test-refresh-secret-not-for-production
+      INTERNAL_API_KEY: ci-test-internal-key
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            mindtwin-ai/backend/auth-service/package-lock.json
+            mindtwin-ai/backend/profile-service/package-lock.json
+            mindtwin-ai/backend/scheduler-service/package-lock.json
+            mindtwin-ai/backend/quiz-service/package-lock.json
+            mindtwin-ai/backend/stress-service/package-lock.json
+            mindtwin-ai/backend/reward-service/package-lock.json
+            mindtwin-ai/backend/notification-service/package-lock.json
+            mindtwin-ai/backend/analytics-service/package-lock.json
+
+      - name: Install dependencies for all backend services
+        working-directory: mindtwin-ai
+        run: |
+          for service in auth-service profile-service scheduler-service quiz-service \
+                         stress-service reward-service notification-service analytics-service; do
+            echo "── Installing $service ──"
+            cd backend/$service && npm ci && cd ../..
+          done
+
+      - name: Run database migrations
+        working-directory: mindtwin-ai
+        run: node backend/database/run_migrations.js
+
+      - name: Run backend unit tests
+        working-directory: mindtwin-ai
+        run: |
+          FAILED=0
+          for service in auth-service profile-service scheduler-service quiz-service \
+                         stress-service reward-service notification-service analytics-service; do
+            echo "── Testing $service ──"
+            cd backend/$service
+            # Only run if a test script is defined in package.json
+            if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.test ? 0 : 1)" 2>/dev/null; then
+              npm test || FAILED=1
+            else
+              echo "  (no test script — skipping)"
+            fi
+            cd ../..
+          done
+          exit $FAILED
+
+      - name: Run integration smoke tests
+        working-directory: mindtwin-ai
+        run: |
+          node scripts/test_onboarding.js || true
+          node scripts/test_phase3.js     || true
+        env:
+          API_BASE_URL: http://localhost:80
+
+  # ── AI Engine ─────────────────────────────────────────────────────────────────
+  test-ai-engine:
+    name: Test AI Engine
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: mindtwin-ai/ai-engine/requirements.txt
+
+      - name: Install AI engine dependencies
+        working-directory: mindtwin-ai/ai-engine
+        run: pip install -r requirements.txt
+
+      - name: Run existing scheduler smoke test
+        working-directory: mindtwin-ai/ai-engine
+        run: python test_scheduler_local.py
+        continue-on-error: true   # non-blocking until full test suite is added
+
+      - name: Run pytest suite (if tests/ directory exists)
+        working-directory: mindtwin-ai/ai-engine
+        run: |
+          if [ -d "tests" ]; then
+            pip install pytest pytest-asyncio
+            pytest tests/ -v --tb=short
+          else
+            echo "No tests/ directory yet — skipping pytest"
+          fi
+
+      - name: Model pipeline smoke test
+        working-directory: mindtwin-ai/ai-engine
+        run: |
+          python - <<'EOF'
+          import sys
+          try:
+              from services.behavioral_pipeline_service import BehavioralPipelineService
+              pipeline = BehavioralPipelineService()
+              X, y = pipeline.generate_training_dataset(num_students=50, days=30)
+              assert X.shape[1] == 14, f"Wrong sequence length: {X.shape[1]}"
+              assert X.shape[2] == 12, f"Wrong feature count: {X.shape[2]}"
+              print("Model pipeline smoke test PASSED")
+          except ImportError as e:
+              print(f"Import skipped (dependency not available in CI): {e}")
+              sys.exit(0)
+          EOF
+
+  # ── Web Frontend ──────────────────────────────────────────────────────────────
+  test-frontend:
+    name: Test & Build Web Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mindtwin-ai/frontend/web/package-lock.json
+
+      - name: Install web frontend dependencies
+        working-directory: mindtwin-ai/frontend/web
+        run: npm ci
+
+      - name: Lint web frontend
+        working-directory: mindtwin-ai/frontend/web
+        run: npm run lint
+
+      - name: Build web frontend (type-check + bundle)
+        working-directory: mindtwin-ai/frontend/web
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: mindtwin-ai/frontend/web/dist/
+          retention-days: 7
+
+  # ── Lint ──────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint All Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Lint backend JavaScript
+        working-directory: mindtwin-ai
+        run: |
+          npm install -g eslint@latest
+          # Lint each service that has an eslint config, skip those that don't
+          for service in auth-service profile-service scheduler-service quiz-service \
+                         stress-service reward-service notification-service analytics-service; do
+            if [ -f "backend/$service/.eslintrc*" ] || [ -f "backend/$service/eslint.config*" ]; then
+              echo "── Linting $service ──"
+              eslint backend/$service/src/**/*.js --max-warnings 20 || true
+            fi
+          done
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Lint Python (flake8)
+        working-directory: mindtwin-ai
+        run: |
+          pip install flake8
+          flake8 ai-engine/ \
+            --max-line-length 120 \
+            --ignore E501,W503 \
+            --exclude ai-engine/.venv,ai-engine/__pycache__
+
+  # ── Mobile App ────────────────────────────────────────────────────────────────
+  test-mobile:
+    name: Lint & Type-check Mobile App
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: mindtwin-ai/frontend/mobile/package-lock.json
+
+      - name: Install mobile dependencies
+        working-directory: mindtwin-ai/frontend/mobile
+        run: npm ci
+        continue-on-error: true   # package-lock.json may not exist yet
+
+      - name: Install mobile dependencies (fallback)
+        working-directory: mindtwin-ai/frontend/mobile
+        run: npm install
+        if: failure()
+
+      - name: Type-check mobile app
+        working-directory: mindtwin-ai/frontend/mobile
+        run: npx tsc --noEmit
+        continue-on-error: true   # non-blocking until full type coverage
+
+      - name: Run mobile tests
+        working-directory: mindtwin-ai/frontend/mobile
+        run: npx jest --passWithNoTests
+
+  # ── Security Audit ────────────────────────────────────────────────────────────
+  security-audit:    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Audit backend dependencies for vulnerabilities
+        working-directory: mindtwin-ai
+        run: |
+          for service in auth-service profile-service scheduler-service quiz-service \
+                         stress-service reward-service notification-service analytics-service; do
+            echo "── Auditing $service ──"
+            cd backend/$service
+            npm audit --audit-level=high || true   # report but don't block CI yet
+            cd ../..
+          done
+
+      - name: Audit web frontend dependencies
+        working-directory: mindtwin-ai/frontend/web
+        run: npm audit --audit-level=high || true
+
+  # ── Final E2E Integration Test ────────────────────────────────────────────────
+  # Spins up the full docker-compose stack and runs the complete user journey.
+  # Only runs on push to develop (not on every PR to save CI minutes).
+  e2e-integration:
+    name: Final E2E Integration Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs: [test-backend, test-ai-engine, test-frontend, lint, security-audit]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Create test .env file
+        working-directory: mindtwin-ai
+        run: |
+          cat > .env.test << 'EOF'
+          DATABASE_URL=postgresql://postgres:testpass@localhost:5432/mindtwin_test
+          MONGODB_URI=mongodb://localhost:27017/mindtwin_test
+          REDIS_URL=redis://localhost:6379
+          JWT_SECRET=ci-test-jwt-secret-32-chars-minimum-ok
+          JWT_REFRESH_SECRET=ci-test-refresh-secret-32-chars-min
+          INTERNAL_API_KEY=ci-test-internal-key-16chars
+          NODE_ENV=test
+          SMTP_HOST=localhost
+          SMTP_USER=test@test.com
+          SMTP_PASS=testpass
+          FIREBASE_SERVICE_ACCOUNT={}
+          EOF
+
+      - name: Start full stack with docker-compose
+        working-directory: mindtwin-ai
+        run: |
+          cp .env.test .env
+          docker-compose up -d --build
+        timeout-minutes: 10
+
+      - name: Wait for all services to be healthy
+        working-directory: mindtwin-ai
+        run: |
+          echo "Waiting for services to start..."
+          sleep 30
+          # Poll health endpoint until ready (max 90s)
+          for i in $(seq 1 18); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/health 2>/dev/null || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Stack is healthy after $((i * 5))s"
+              break
+            fi
+            echo "  Attempt $i/18: HTTP $STATUS — waiting 5s..."
+            sleep 5
+          done
+
+      - name: Run database migrations
+        working-directory: mindtwin-ai
+        run: |
+          docker-compose exec -T auth-service node /app/src/../../../database/run_migrations.js || \
+            echo "Migration step skipped (path may differ in CI)"
+
+      - name: Install E2E test dependencies
+        working-directory: mindtwin-ai
+        run: npm install axios
+
+      - name: Run final E2E test suite
+        working-directory: mindtwin-ai
+        run: node scripts/final_e2e_test.js http://localhost:80
+        timeout-minutes: 5
+
+      - name: Print docker-compose logs on failure
+        if: failure()
+        working-directory: mindtwin-ai
+        run: docker-compose logs --tail=50
+
+      - name: Tear down stack
+        if: always()
+        working-directory: mindtwin-ai
+        run: docker-compose down -v

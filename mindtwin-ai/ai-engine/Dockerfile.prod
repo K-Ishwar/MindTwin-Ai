@@ -1,0 +1,38 @@
+# ── Stage 1: Build — install Python deps as non-root-compatible user packages ──
+FROM python:3.11-slim AS builder
+WORKDIR /app
+
+RUN pip install --upgrade pip
+
+COPY requirements.txt .
+# Install into user site-packages so they can be copied to the final image
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# ── Stage 2: Production image (minimal attack surface) ────────────────────────
+FROM python:3.11-slim AS production
+
+# Create non-root user
+RUN useradd -m -u 1001 aiuser
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /root/.local /home/aiuser/.local
+
+# Copy application source (owned by aiuser)
+COPY --chown=aiuser:aiuser . .
+
+# Drop to non-root
+USER aiuser
+
+# Ensure user-installed binaries (uvicorn) are on PATH
+ENV PATH=/home/aiuser/.local/bin:$PATH
+
+# Disable Python bytecode writing and enable unbuffered logs
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8000
+
+# 2 workers — tune based on available vCPUs (2 * vCPUs + 1 is a common rule)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
