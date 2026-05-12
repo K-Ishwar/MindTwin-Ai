@@ -1,0 +1,151 @@
+{
+  "subject": "Physics",
+  "board": "JEE",
+  "grade": "Main",
+  "topics": [
+    {
+      "id": "phy_jee_001",
+      "name": "Units Dimensions and Measurement",
+      "prerequisites": [],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_jee_002",
+      "name": "Kinematics",
+      "prerequisites": ["phy_jee_001"],
+      "weightage_percent": 6,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_003",
+      "name": "Laws of Motion",
+      "prerequisites": ["phy_jee_002"],
+      "weightage_percent": 7,
+      "estimated_hours": 11,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_004",
+      "name": "Work Energy and Power",
+      "prerequisites": ["phy_jee_003"],
+      "weightage_percent": 6,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_005",
+      "name": "Rotational Motion",
+      "prerequisites": ["phy_jee_004"],
+      "weightage_percent": 7,
+      "estimated_hours": 12,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_006",
+      "name": "Gravitation",
+      "prerequisites": ["phy_jee_003"],
+      "weightage_percent": 5,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_007",
+      "name": "Properties of Matter",
+      "prerequisites": ["phy_jee_003"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_jee_008",
+      "name": "Thermal Physics",
+      "prerequisites": ["phy_jee_001"],
+      "weightage_percent": 8,
+      "estimated_hours": 13,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_009",
+      "name": "Waves and Sound",
+      "prerequisites": ["phy_jee_004"],
+      "weightage_percent": 6,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_010",
+      "name": "Electrostatics",
+      "prerequisites": ["phy_jee_001"],
+      "weightage_percent": 9,
+      "estimated_hours": 14,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_011",
+      "name": "Current Electricity",
+      "prerequisites": ["phy_jee_010"],
+      "weightage_percent": 8,
+      "estimated_hours": 12,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_012",
+      "name": "Magnetic Effects of Current",
+      "prerequisites": ["phy_jee_011"],
+      "weightage_percent": 7,
+      "estimated_hours": 11,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_013",
+      "name": "Electromagnetic Induction and AC",
+      "prerequisites": ["phy_jee_012"],
+      "weightage_percent": 8,
+      "estimated_hours": 12,
+      "difficulty_level": 5,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_014",
+      "name": "Optics",
+      "prerequisites": ["phy_jee_009"],
+      "weightage_percent": 8,
+      "estimated_hours": 13,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_015",
+      "name": "Modern Physics",
+      "prerequisites": ["phy_jee_010", "phy_jee_014"],
+      "weightage_percent": 8,
+      "estimated_hours": 12,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_jee_016",
+      "name": "Semiconductors",
+      "prerequisites": ["phy_jee_015"],
+      "weightage_percent": 5,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    }
+  ]
+}

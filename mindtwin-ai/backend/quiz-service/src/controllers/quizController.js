@@ -1,9 +1,9 @@
-const db = require('../config/db');
+﻿const logger = require('../../../../shared/logger');\nconst db = require('../config/db');
 const axios = require('axios');
 
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://ai-engine:8000';
 
-// ── Fallback topics when DB is empty ──────────────────────────────────────────
+// â”€â”€ Fallback topics when DB is empty â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const FALLBACK_TOPICS = [
   { id: 'fallback-1', topic_name: 'Algebra & Equations', subject: 'Mathematics', difficulty_level: 3 },
   { id: 'fallback-2', topic_name: 'Organic Chemistry Basics', subject: 'Chemistry', difficulty_level: 3 },
@@ -12,30 +12,30 @@ const FALLBACK_TOPICS = [
   { id: 'fallback-5', topic_name: 'French Revolution', subject: 'History', difficulty_level: 2 },
 ];
 
-// ── Mock question bank keyed by topic keywords ────────────────────────────────
+// â”€â”€ Mock question bank keyed by topic keywords â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const generateMockQuestions = (topicName, topicId) => {
   const lower = (topicName || '').toLowerCase();
 
   const banks = {
     math: [
-      { question_text: 'What is the solution to x² - 5x + 6 = 0?', options: ['x=2,3', 'x=1,6', 'x=-2,-3', 'x=0,5'], answer: 'A', difficulty: 3 },
-      { question_text: 'Simplify: (a+b)² - (a-b)²', options: ['4ab', '2ab', 'a²+b²', '0'], answer: 'A', difficulty: 2 },
+      { question_text: 'What is the solution to xÂ² - 5x + 6 = 0?', options: ['x=2,3', 'x=1,6', 'x=-2,-3', 'x=0,5'], answer: 'A', difficulty: 3 },
+      { question_text: 'Simplify: (a+b)Â² - (a-b)Â²', options: ['4ab', '2ab', 'aÂ²+bÂ²', '0'], answer: 'A', difficulty: 2 },
       { question_text: 'If f(x) = 2x+3, find f(4)', options: ['11', '9', '10', '8'], answer: 'A', difficulty: 1 },
       { question_text: 'Solve: 3x + 7 = 22', options: ['x=5', 'x=4', 'x=6', 'x=3'], answer: 'A', difficulty: 1 },
-      { question_text: 'Which is NOT a real number?', options: ['√-1', '√2', '-5', '0'], answer: 'A', difficulty: 2 },
+      { question_text: 'Which is NOT a real number?', options: ['âˆš-1', 'âˆš2', '-5', '0'], answer: 'A', difficulty: 2 },
     ],
     chemistry: [
-      { question_text: 'What is the functional group of an alcohol?', options: ['-OH', '-COOH', '-CHO', '-NH₂'], answer: 'A', difficulty: 2 },
+      { question_text: 'What is the functional group of an alcohol?', options: ['-OH', '-COOH', '-CHO', '-NHâ‚‚'], answer: 'A', difficulty: 2 },
       { question_text: 'Ethanol undergoes what type of reaction with Na?', options: ['Substitution', 'Addition', 'Elimination', 'Redox'], answer: 'A', difficulty: 3 },
       { question_text: 'Which is the simplest alkane?', options: ['Methane', 'Ethane', 'Propane', 'Butane'], answer: 'A', difficulty: 1 },
-      { question_text: 'The IUPAC name of CH₃OH is:', options: ['Methanol', 'Ethanol', 'Propanol', 'Butanol'], answer: 'A', difficulty: 2 },
+      { question_text: 'The IUPAC name of CHâ‚ƒOH is:', options: ['Methanol', 'Ethanol', 'Propanol', 'Butanol'], answer: 'A', difficulty: 2 },
       { question_text: 'Benzene has how many carbon atoms?', options: ['6', '4', '8', '3'], answer: 'A', difficulty: 1 },
     ],
     physics: [
-      { question_text: "Newton's 2nd law relates force to:", options: ['Mass × Acceleration', 'Mass × Velocity', 'Weight × Time', 'Speed × Distance'], answer: 'A', difficulty: 2 },
+      { question_text: "Newton's 2nd law relates force to:", options: ['Mass Ã— Acceleration', 'Mass Ã— Velocity', 'Weight Ã— Time', 'Speed Ã— Distance'], answer: 'A', difficulty: 2 },
       { question_text: 'A body at rest stays at rest unless acted on by:', options: ['External force', 'Gravity only', 'Friction', 'Internal energy'], answer: 'A', difficulty: 1 },
       { question_text: 'Unit of force in SI system is:', options: ['Newton', 'Pascal', 'Joule', 'Watt'], answer: 'A', difficulty: 1 },
-      { question_text: 'If F=ma, what is the acceleration when F=10N, m=2kg?', options: ['5 m/s²', '20 m/s²', '0.2 m/s²', '10 m/s²'], answer: 'A', difficulty: 2 },
+      { question_text: 'If F=ma, what is the acceleration when F=10N, m=2kg?', options: ['5 m/sÂ²', '20 m/sÂ²', '0.2 m/sÂ²', '10 m/sÂ²'], answer: 'A', difficulty: 2 },
       { question_text: 'Action and reaction forces act on:', options: ['Different bodies', 'Same body', 'Same point', 'Parallel lines'], answer: 'A', difficulty: 3 },
     ],
     biology: [
@@ -63,7 +63,7 @@ const generateMockQuestions = (topicName, topicId) => {
   }));
 };
 
-// ── GET /api/quiz/baseline-questions ─────────────────────────────────────────
+// â”€â”€ GET /api/quiz/baseline-questions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getBaselineQuestions = async (req, res, next) => {
   try {
     const result = await db.query(
@@ -77,12 +77,12 @@ const getBaselineQuestions = async (req, res, next) => {
     const topics = result.rows.length >= 5 ? result.rows : FALLBACK_TOPICS;
     res.json({ success: true, topics });
   } catch (err) {
-    // DB might not be available — return fallbacks
+    // DB might not be available â€” return fallbacks
     res.json({ success: true, topics: FALLBACK_TOPICS });
   }
 };
 
-// ── GET /api/quiz/questions/:topicId ─────────────────────────────────────────
+// â”€â”€ GET /api/quiz/questions/:topicId â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getTopicQuestions = async (req, res, next) => {
   try {
     const { topicId } = req.params;
@@ -104,7 +104,7 @@ const getTopicQuestions = async (req, res, next) => {
   }
 };
 
-// ── POST /api/quiz/attempt ────────────────────────────────────────────────────
+// â”€â”€ POST /api/quiz/attempt â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const submitAttempt = async (req, res, next) => {
   try {
     const { student_id } = req.user;
@@ -140,7 +140,7 @@ const submitAttempt = async (req, res, next) => {
 
     // Feedback message
     let feedback_message;
-    if (score_percent < 40) feedback_message = 'This topic needs revision — let\'s schedule more time for it.';
+    if (score_percent < 40) feedback_message = 'This topic needs revision â€” let\'s schedule more time for it.';
     else if (score_percent <= 70) feedback_message = 'Getting there! A bit more practice will sharpen this.';
     else feedback_message = 'Great work! You\'ve got a solid grip on this topic.';
 
@@ -162,7 +162,7 @@ const submitAttempt = async (req, res, next) => {
           gap_topic_ids: [topic_id]
         }, { headers: { Authorization: `Bearer ${token}` } });
       } catch (err) {
-        console.warn('Replan failed (non-critical):', err.message);
+        logger.warn('Replan failed (non-critical):', err.message);
       }
     }
 
@@ -171,7 +171,13 @@ const submitAttempt = async (req, res, next) => {
       student_id,
       session_data: { duration_min: total * 2, topic_id, mood_after: null, completed: true },
       quiz_data: { topic_id, score_percent },
-    }).catch((err) => console.warn('Twin update failed (non-critical):', err.message));
+    }).catch((err) => logger.warn('Twin update failed (non-critical):', err.message));
+
+    // Increment quiz attempts metric
+    try {
+      const { quizAttemptsTotal } = require('../../../../shared/metrics');
+      quizAttemptsTotal.inc({ subject: topicName, gap_detected: String(gap_detected) });
+    } catch (_) { /* metrics not critical */ }
 
     res.json({
       success: true,

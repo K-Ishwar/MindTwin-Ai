@@ -30,6 +30,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgres://user:password@postgres:5432
 NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://notification-service:3007")
 REWARD_SERVICE_URL = os.getenv("REWARD_SERVICE_URL", "http://reward-service:3006")
 AI_ENGINE_URL = os.getenv("AI_ENGINE_URL", "http://ai-engine:8000")
+ANALYTICS_SERVICE_URL = os.getenv("ANALYTICS_SERVICE_URL", "http://analytics-service:3008")
 INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY", "internal-secret")
 
 
@@ -361,13 +362,132 @@ async def run_daily_reward_reset():
     return summary
 
 
+# ─── Job 4: Weekly Digest Notifications ───────────────────────────────────────
+
+async def run_weekly_digest_notifications():
+    """
+    Runs every Sunday at 18:00 (6 PM) IST.
+    Calls the analytics-service internal endpoint which fans out weekly digest
+    push notifications to all active students.
+    """
+    logger.info("📊 Starting weekly digest notifications...")
+    start_time = datetime.now()
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                f"{ANALYTICS_SERVICE_URL}/api/analytics/internal/weekly-digest-notify",
+                headers={"x-api-key": INTERNAL_API_KEY}
+            )
+            success = resp.status_code == 200
+            detail = resp.json() if success else resp.text
+    except Exception as e:
+        success = False
+        detail = str(e)
+        logger.error(f"Failed to trigger weekly digest notifications: {e}")
+
+    elapsed = (datetime.now() - start_time).total_seconds()
+    summary = {
+        "job": "weekly_digest_notifications",
+        "success": success,
+        "detail": detail,
+        "elapsed_seconds": round(elapsed, 2),
+        "completed_at": datetime.now().isoformat()
+    }
+    logger.info(f"📊 Weekly digest notifications complete: {json.dumps(summary, default=str)}")
+    return summary
+
+
+# ─── Job 5: Weekly Digest with Email ──────────────────────────────────────────
+
+async def run_weekly_digest():
+    """
+    Runs every Sunday at 18:00 (6 PM) IST.
+
+    Steps:
+    1. Get all active students (onboarding_completed = true, active in last 7 days)
+    2. For each student:
+       a. Call GET /api/ai/analytics/weekly-digest/{student_id}
+       b. POST /api/notifications/send-weekly-digest with digest data
+          → notification-service sends push + email (if email_verified)
+    3. Log: { students_processed, push_sent, email_sent, errors }
+    """
+    logger.info("📧 Starting weekly digest (push + email)...")
+    start_time = datetime.now()
+
+    student_ids = _get_active_student_ids()
+    students_processed = 0
+    push_sent = 0
+    email_sent = 0
+    errors = 0
+
+    for student_id in student_ids:
+        try:
+            # a. Fetch digest data from analytics router
+            digest_data = None
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    resp = await client.get(
+                        f"{AI_ENGINE_URL}/api/ai/analytics/weekly-digest/{student_id}"
+                    )
+                    if resp.status_code == 200:
+                        digest_data = resp.json()
+            except Exception as fetch_err:
+                logger.warning(f"Could not fetch digest for {student_id}: {fetch_err}")
+
+            # b. Send via notification-service (push + email)
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                notif_resp = await client.post(
+                    f"{NOTIFICATION_SERVICE_URL}/api/notifications/send-weekly-digest",
+                    json={
+                        "student_id": student_id,
+                        "digest_data": digest_data or {},
+                    },
+                    headers={"x-api-key": INTERNAL_API_KEY}
+                )
+
+                if notif_resp.status_code == 200:
+                    result = notif_resp.json()
+                    students_processed += 1
+                    if result.get("push_sent"):
+                        push_sent += 1
+                    if result.get("email_sent"):
+                        email_sent += 1
+                else:
+                    errors += 1
+                    logger.warning(
+                        f"send-weekly-digest failed for {student_id}: "
+                        f"{notif_resp.status_code} {notif_resp.text}"
+                    )
+
+        except Exception as e:
+            errors += 1
+            logger.error(f"Weekly digest error for {student_id}: {e}")
+
+    elapsed = (datetime.now() - start_time).total_seconds()
+    summary = {
+        "job": "weekly_digest",
+        "total_active_students": len(student_ids),
+        "students_processed": students_processed,
+        "push_sent": push_sent,
+        "email_sent": email_sent,
+        "errors": errors,
+        "elapsed_seconds": round(elapsed, 2),
+        "completed_at": datetime.now().isoformat(),
+    }
+    logger.info(f"📧 Weekly digest complete: {json.dumps(summary)}")
+    return summary
+
+
 # ─── Scheduler Setup ──────────────────────────────────────────────────────────
 
 # Job registry for manual trigger lookups
 JOB_REGISTRY = {
-    "nightly_stress_checks": run_nightly_stress_checks,
-    "twin_update_batch": run_twin_update_batch,
-    "daily_reward_reset": run_daily_reward_reset,
+    "nightly_stress_checks":       run_nightly_stress_checks,
+    "twin_update_batch":           run_twin_update_batch,
+    "daily_reward_reset":          run_daily_reward_reset,
+    "weekly_digest_notifications": run_weekly_digest_notifications,
+    "weekly_digest":               run_weekly_digest,
 }
 
 # Initialize the scheduler
@@ -392,5 +512,19 @@ scheduler.add_job(
     CronTrigger(hour=0, minute=1),
     id="daily_reward_reset",
     name="Daily Reward Reset",
+    replace_existing=True,
+)
+scheduler.add_job(
+    run_weekly_digest_notifications,
+    CronTrigger(day_of_week="sun", hour=18, minute=0),
+    id="weekly_digest_notifications",
+    name="Weekly Digest Notifications (push only)",
+    replace_existing=True,
+)
+scheduler.add_job(
+    run_weekly_digest,
+    CronTrigger(day_of_week="sun", hour=18, minute=5),
+    id="weekly_digest",
+    name="Weekly Digest (push + email)",
     replace_existing=True,
 )

@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 
 const ACTIONS = [
-  { label: 'Take a Quiz', emoji: '🧠', to: '/quiz', color: 'from-indigo-600 to-violet-600' },
-  { label: 'View Gaps', emoji: '📊', to: '/gaps', color: 'from-amber-600 to-orange-600' },
-  { label: 'My Progress', emoji: '📈', to: '/progress', color: 'from-emerald-600 to-teal-600' },
-  { label: 'Rewards', emoji: '🎁', to: '/rewards', color: 'from-pink-600 to-rose-600' },
+  { label: 'Take a Quiz',    emoji: '🧠', to: '/quiz',          color: 'from-indigo-600 to-violet-600' },
+  { label: 'View Gaps',      emoji: '📊', to: '/gaps',          color: 'from-amber-600 to-orange-600' },
+  { label: 'My Progress',    emoji: '📈', to: '/progress',      color: 'from-emerald-600 to-teal-600' },
+  { label: 'Knowledge Map',  emoji: '🕸', to: '/knowledge-map', color: 'from-blue-600 to-cyan-600' },
 ];
 
 export default function QuickActionsRow() {

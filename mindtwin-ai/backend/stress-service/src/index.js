@@ -1,27 +1,33 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
+﻿const express    = require('express');
+const cors       = require('cors');
+const helmet     = require('helmet');
+const compression = require('compression');
+require('dotenv').config();
 
-dotenv.config();
+process.env.SERVICE_NAME = 'stress-service';
+const logger         = require('../../../shared/logger');
+const requestLogger  = require('../../../shared/middleware/requestLogger');
+const globalErrorHandler = require('../../../shared/middleware/errorHandler');
+const { metricsMiddleware } = require('../../../shared/metrics');\n
+const stressRoutes = require('./routes/stressRoutes');
 
 const app = express();
+app.use(compression({ threshold: 1024, level: 6 }));
 app.use(cors());
+app.use(helmet());
 app.use(express.json());
-
-const stressRoutes = require('./routes/stressRoutes');
+app.use(requestLogger);
+metricsMiddleware(app);
 
 app.use('/api/stress', stressRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Hello World from stress-service');
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'stress-service' });
 });
+
+app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 3005;
-
-app.get('/health', (req, res) => {
-  res.json({ status: "ok", service: "stress-service" });
-});
-
 app.listen(PORT, () => {
-  console.log('stress-service listening on port ' + PORT);
+  logger.info(`Stress service running on port ${PORT}`);
 });

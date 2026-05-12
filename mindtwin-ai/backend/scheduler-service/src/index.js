@@ -1,33 +1,39 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+﻿const express    = require('express');
+const cors       = require('cors');
+const helmet     = require('helmet');
+const compression = require('compression');
 require('dotenv').config();
 
+process.env.SERVICE_NAME = 'scheduler-service';
+const logger         = require('../../../shared/logger');
+const requestLogger  = require('../../../shared/middleware/requestLogger');
+const globalErrorHandler = require('../../../shared/middleware/errorHandler');
+const { metricsMiddleware } = require('../../../shared/metrics');\n
 const schedulerRoutes = require('./routes/schedulerRoutes');
 
 const app = express();
 
+app.use(compression({ threshold: 1024, level: 6 }));
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
-app.use(morgan('dev'));
+app.use(requestLogger);
+metricsMiddleware(app);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'scheduler-service' });
+  const { circuitBreakerRegistry } = require('./utils/serviceClients');
+  res.json({
+    status:           'ok',
+    service:          'scheduler-service',
+    circuit_breakers: circuitBreakerRegistry.getAllStatus(),
+  });
 });
 
 app.use('/api/scheduler', schedulerRoutes);
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  const status = err.response?.status || err.status || 500;
-  const message = err.response?.data?.error || err.message || 'Internal Server Error';
-  res.status(status).json({ success: false, error: message });
-});
+app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
-  console.log(`Scheduler service running on port ${PORT}`);
+  logger.info(`Scheduler service running on port ${PORT}`);
 });

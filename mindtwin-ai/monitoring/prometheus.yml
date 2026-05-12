@@ -1,0 +1,103 @@
+global:
+  scrape_interval:     15s   # How often to scrape targets
+  evaluation_interval: 15s   # How often to evaluate rules
+  scrape_timeout:      10s
+
+  external_labels:
+    environment: 'development'
+    project:     'mindtwin'
+
+# ── Alerting (optional — wire to Alertmanager later) ─────────────────────────
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# ── Scrape configs ────────────────────────────────────────────────────────────
+scrape_configs:
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ── Node.js microservices ─────────────────────────────────────────────────
+  - job_name: 'auth-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['auth-service:3001']
+        labels:
+          service: 'auth-service'
+
+  - job_name: 'profile-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['profile-service:3002']
+        labels:
+          service: 'profile-service'
+
+  - job_name: 'scheduler-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['scheduler-service:3003']
+        labels:
+          service: 'scheduler-service'
+
+  - job_name: 'quiz-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['quiz-service:3004']
+        labels:
+          service: 'quiz-service'
+
+  - job_name: 'stress-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['stress-service:3005']
+        labels:
+          service: 'stress-service'
+
+  - job_name: 'reward-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['reward-service:3006']
+        labels:
+          service: 'reward-service'
+
+  - job_name: 'notification-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['notification-service:3007']
+        labels:
+          service: 'notification-service'
+
+  - job_name: 'analytics-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['analytics-service:3008']
+        labels:
+          service: 'analytics-service'
+
+  # ── Python AI engine ──────────────────────────────────────────────────────
+  - job_name: 'ai-engine'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['ai-engine:8000']
+        labels:
+          service: 'ai-engine'
+
+  # ── Infrastructure ────────────────────────────────────────────────────────
+  # Uncomment when node-exporter is added to docker-compose
+  # - job_name: 'node-exporter'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+
+  # Uncomment when postgres-exporter is added
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+
+  # Uncomment when redis-exporter is added
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']

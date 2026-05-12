@@ -1,4 +1,4 @@
-const db = require('../config/db');
+﻿const logger = require('../../../../shared/logger');\nconst db = require('../config/db');
 
 // POST /api/notifications/send (Internal API)
 exports.sendNotification = async (req, res, next) => {
@@ -23,7 +23,7 @@ exports.sendNotification = async (req, res, next) => {
 
     res.json({ success: true, notification_id: result.rows[0].id });
   } catch (err) {
-    console.error('Error sending notification:', err);
+    logger.error('Error sending notification:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -50,7 +50,7 @@ exports.getNotifications = async (req, res, next) => {
 
     res.json({ success: true, notifications: result.rows, unread_count });
   } catch (err) {
-    console.error('Error fetching notifications:', err);
+    logger.error('Error fetching notifications:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -68,7 +68,7 @@ exports.markRead = async (req, res, next) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error('Error marking notification read:', err);
+    logger.error('Error marking notification read:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -90,7 +90,7 @@ exports.registerToken = async (req, res, next) => {
 
     res.json({ success: true, message: 'Push token registered successfully' });
   } catch (err) {
-    console.error('Error registering push token:', err);
+    logger.error('Error registering push token:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };

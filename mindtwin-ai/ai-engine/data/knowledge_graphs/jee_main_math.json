@@ -1,0 +1,169 @@
+{
+  "subject": "Mathematics",
+  "board": "JEE",
+  "grade": "Main",
+  "topics": [
+    {
+      "id": "math_jee_001",
+      "name": "Sets Relations and Functions",
+      "prerequisites": [],
+      "weightage_percent": 4,
+      "estimated_hours": 8,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_jee_002",
+      "name": "Complex Numbers",
+      "prerequisites": ["math_jee_001"],
+      "weightage_percent": 5,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_003",
+      "name": "Matrices and Determinants",
+      "prerequisites": ["math_jee_001"],
+      "weightage_percent": 6,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_004",
+      "name": "Permutations and Combinations",
+      "prerequisites": ["math_jee_001"],
+      "weightage_percent": 4,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_005",
+      "name": "Sequences and Series",
+      "prerequisites": ["math_jee_001"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_006",
+      "name": "Binomial Theorem",
+      "prerequisites": ["math_jee_004"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_007",
+      "name": "Trigonometry",
+      "prerequisites": ["math_jee_001"],
+      "weightage_percent": 6,
+      "estimated_hours": 12,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_008",
+      "name": "Coordinate Geometry 2D",
+      "prerequisites": ["math_jee_007"],
+      "weightage_percent": 9,
+      "estimated_hours": 15,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_009",
+      "name": "Three Dimensional Geometry",
+      "prerequisites": ["math_jee_008"],
+      "weightage_percent": 6,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_010",
+      "name": "Differential Calculus",
+      "prerequisites": ["math_jee_007", "math_jee_008"],
+      "weightage_percent": 12,
+      "estimated_hours": 18,
+      "difficulty_level": 5,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_011",
+      "name": "Integral Calculus",
+      "prerequisites": ["math_jee_010"],
+      "weightage_percent": 12,
+      "estimated_hours": 18,
+      "difficulty_level": 5,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_012",
+      "name": "Differential Equations",
+      "prerequisites": ["math_jee_011"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_013",
+      "name": "Vector Algebra",
+      "prerequisites": ["math_jee_009"],
+      "weightage_percent": 6,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_014",
+      "name": "Statistics and Probability",
+      "prerequisites": ["math_jee_004"],
+      "weightage_percent": 7,
+      "estimated_hours": 11,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_015",
+      "name": "Mathematical Reasoning",
+      "prerequisites": ["math_jee_001"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_jee_016",
+      "name": "Linear Programming",
+      "prerequisites": ["math_jee_008"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_jee_017",
+      "name": "Quadratic Equations and Inequalities",
+      "prerequisites": ["math_jee_002"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_jee_018",
+      "name": "Limits Continuity and Differentiability",
+      "prerequisites": ["math_jee_010"],
+      "weightage_percent": 8,
+      "estimated_hours": 14,
+      "difficulty_level": 5,
+      "exam_importance": "high"
+    }
+  ]
+}

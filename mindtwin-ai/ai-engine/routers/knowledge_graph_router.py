@@ -37,6 +37,49 @@ def list_graphs():
     return {"success": True, "graphs": svc.list_available_graphs()}
 
 
+@router.get("/available/subjects")
+def get_available_subjects(board: str, grade: str):
+    """
+    Return all subjects with a loaded knowledge graph for a given board + grade.
+
+    Example: GET /api/ai/knowledge-graph/available/subjects?board=CBSE&grade=Class+12
+    """
+    svc = get_knowledge_graph_service()
+    subjects = svc.get_available_subjects(board, grade)
+    return {
+        "success": True,
+        "board":   board,
+        "grade":   grade,
+        "subjects": subjects,
+        "count":   len(subjects),
+    }
+
+
+@router.post("/cross-subject-dependencies")
+def get_cross_subject_dependencies(body: dict):
+    """
+    Find topics that appear as shared concepts across multiple subjects.
+    Useful for PCMB students to understand foundational cross-subject links.
+
+    Body: { "subjects": ["Mathematics", "Physics"], "board": "CBSE", "grade": "Class 12" }
+    """
+    svc = get_knowledge_graph_service()
+    subjects = body.get("subjects", [])
+    board    = body.get("board", "CBSE")
+    grade    = body.get("grade", "Class 12")
+
+    if not subjects:
+        raise HTTPException(status_code=400, detail="subjects list is required")
+
+    deps = svc.get_cross_subject_dependencies(subjects, board, grade)
+    return {
+        "success":      True,
+        "subjects":     subjects,
+        "dependencies": deps,
+        "count":        len(deps),
+    }
+
+
 @router.get("/{subject}/{board}/{grade}")
 def get_graph(subject: str, board: str, grade: str):
     """

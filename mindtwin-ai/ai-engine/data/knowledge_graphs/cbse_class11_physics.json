@@ -1,0 +1,142 @@
+{
+  "subject": "Physics",
+  "board": "CBSE",
+  "grade": "Class 11",
+  "topics": [
+    {
+      "id": "phy_11_cbse_001",
+      "name": "Physical World",
+      "prerequisites": [],
+      "weightage_percent": 2,
+      "estimated_hours": 3,
+      "difficulty_level": 1,
+      "exam_importance": "low"
+    },
+    {
+      "id": "phy_11_cbse_002",
+      "name": "Units and Measurements",
+      "prerequisites": ["phy_11_cbse_001"],
+      "weightage_percent": 5,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_003",
+      "name": "Motion in a Straight Line",
+      "prerequisites": ["phy_11_cbse_002"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_004",
+      "name": "Motion in a Plane",
+      "prerequisites": ["phy_11_cbse_003"],
+      "weightage_percent": 7,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_005",
+      "name": "Laws of Motion",
+      "prerequisites": ["phy_11_cbse_003"],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_006",
+      "name": "Work Energy and Power",
+      "prerequisites": ["phy_11_cbse_005"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_007",
+      "name": "System of Particles and Rotational Motion",
+      "prerequisites": ["phy_11_cbse_006"],
+      "weightage_percent": 8,
+      "estimated_hours": 11,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_008",
+      "name": "Gravitation",
+      "prerequisites": ["phy_11_cbse_005"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_009",
+      "name": "Mechanical Properties of Solids",
+      "prerequisites": ["phy_11_cbse_005"],
+      "weightage_percent": 5,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_11_cbse_010",
+      "name": "Mechanical Properties of Fluids",
+      "prerequisites": ["phy_11_cbse_009"],
+      "weightage_percent": 5,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "phy_11_cbse_011",
+      "name": "Thermal Properties of Matter",
+      "prerequisites": ["phy_11_cbse_002"],
+      "weightage_percent": 6,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_012",
+      "name": "Thermodynamics",
+      "prerequisites": ["phy_11_cbse_011"],
+      "weightage_percent": 7,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_013",
+      "name": "Kinetic Theory",
+      "prerequisites": ["phy_11_cbse_012"],
+      "weightage_percent": 5,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_014",
+      "name": "Oscillations",
+      "prerequisites": ["phy_11_cbse_006"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "phy_11_cbse_015",
+      "name": "Waves",
+      "prerequisites": ["phy_11_cbse_014"],
+      "weightage_percent": 9,
+      "estimated_hours": 11,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    }
+  ]
+}

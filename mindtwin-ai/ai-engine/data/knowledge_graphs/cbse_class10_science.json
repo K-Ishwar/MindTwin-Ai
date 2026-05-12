@@ -1,0 +1,124 @@
+{
+  "subject": "Science",
+  "board": "CBSE",
+  "grade": "Class 10",
+  "topics": [
+    {
+      "id": "sci_10_cbse_001",
+      "name": "Chemical Reactions and Equations",
+      "prerequisites": [],
+      "weightage_percent": 7,
+      "estimated_hours": 7,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_002",
+      "name": "Acids Bases and Salts",
+      "prerequisites": ["sci_10_cbse_001"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_003",
+      "name": "Metals and Non-metals",
+      "prerequisites": ["sci_10_cbse_001"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_004",
+      "name": "Carbon and its Compounds",
+      "prerequisites": ["sci_10_cbse_003"],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_005",
+      "name": "Life Processes",
+      "prerequisites": [],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_006",
+      "name": "Control and Coordination",
+      "prerequisites": ["sci_10_cbse_005"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_007",
+      "name": "How do Organisms Reproduce",
+      "prerequisites": ["sci_10_cbse_005"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_008",
+      "name": "Heredity and Evolution",
+      "prerequisites": ["sci_10_cbse_007"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_009",
+      "name": "Light Reflection and Refraction",
+      "prerequisites": [],
+      "weightage_percent": 9,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_010",
+      "name": "Human Eye and the Colourful World",
+      "prerequisites": ["sci_10_cbse_009"],
+      "weightage_percent": 6,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_011",
+      "name": "Electricity",
+      "prerequisites": [],
+      "weightage_percent": 9,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_012",
+      "name": "Magnetic Effects of Electric Current",
+      "prerequisites": ["sci_10_cbse_011"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "sci_10_cbse_013",
+      "name": "Our Environment",
+      "prerequisites": [],
+      "weightage_percent": 5,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    }
+  ]
+}

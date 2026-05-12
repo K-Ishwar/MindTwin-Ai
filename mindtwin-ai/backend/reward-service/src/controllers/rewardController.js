@@ -1,9 +1,16 @@
-const db = require('../config/db');
+﻿'use strict';
 
-// ── Token award table ─────────────────────────────────────────────────────────
+
+const logger = require('../../../../shared/logger');\nconst db    = require('../config/db');
+const redis = require('../config/redis');
+const { createCacheService, CACHE_KEYS, CACHE_TTL } = require('../../../../shared/cache/cacheService');
+
+const cache = createCacheService(redis);
+
+// â”€â”€ Token award table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Maps action + context conditions to { tokens, social_mins }
 const AWARD_TABLE = [
-  // Session complete — checked in order (longer first for bonus)
+  // Session complete â€” checked in order (longer first for bonus)
   {
     action: 'session_complete',
     condition: (ctx) => (ctx.duration_min || 0) >= 50,
@@ -18,7 +25,7 @@ const AWARD_TABLE = [
     social_mins: 15,
     label: 'Session complete',
   },
-  // Quiz complete — checked in order (high score first)
+  // Quiz complete â€” checked in order (high score first)
   {
     action: 'quiz_complete',
     condition: (ctx) => (ctx.score_percent || 0) >= 90,
@@ -41,7 +48,7 @@ const AWARD_TABLE = [
   { action: 'session_skipped_unexcused', condition: () => true, tokens: -5, social_mins: 0,  label: 'Unexcused skip penalty' },
 ];
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /**
  * Resolve the award rule for a given action + context.
@@ -67,7 +74,7 @@ async function ensureTokenRow(student_id) {
   );
 }
 
-// ── POST /api/reward/award ────────────────────────────────────────────────────
+// â”€â”€ POST /api/reward/award â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const awardTokens = async (req, res, next) => {
   try {
     const { student_id, action, context = {} } = req.body;
@@ -121,49 +128,64 @@ const awardTokens = async (req, res, next) => {
       total_social_media_mins: row.social_media_mins_unlocked,
       message: award.label,
     });
+
+    // Increment token awards metric
+    try {
+      const { tokenAwardsTotal } = require('../../../../shared/metrics');
+      tokenAwardsTotal.inc({ action: award.label || action });
+    } catch (_) { /* metrics not critical */ }
+
+    // Invalidate token balance cache after any award
+    await cache.invalidate(CACHE_KEYS.TOKEN_BALANCE(student_id));
   } catch (err) {
     next(err);
   }
 };
 
-// ── GET /api/reward/balance ───────────────────────────────────────────────────
+// â”€â”€ GET /api/reward/balance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getBalance = async (req, res, next) => {
   try {
     const { student_id } = req.user;
 
     await ensureTokenRow(student_id);
 
-    const [balanceRes, historyRes] = await Promise.all([
-      db.query(
-        `SELECT balance, earned_today, social_media_mins_unlocked
-         FROM focus_tokens WHERE student_id = $1`,
-        [student_id]
-      ),
-      db.query(
-        `SELECT action, tokens_delta, social_media_mins_delta, balance_after, created_at
-         FROM token_history
-         WHERE student_id = $1
-         ORDER BY created_at DESC
-         LIMIT 10`,
-        [student_id]
-      ),
-    ]);
+    const data = await cache.getOrSet(
+      CACHE_KEYS.TOKEN_BALANCE(student_id),
+      async () => {
+        const [balanceRes, historyRes] = await Promise.all([
+          db.query(
+            `SELECT balance, earned_today, social_media_mins_unlocked
+             FROM focus_tokens WHERE student_id = $1`,
+            [student_id]
+          ),
+          db.query(
+            `SELECT action, tokens_delta, social_media_mins_delta, balance_after, created_at
+             FROM token_history
+             WHERE student_id = $1
+             ORDER BY created_at DESC
+             LIMIT 10`,
+            [student_id]
+          ),
+        ]);
 
-    const bal = balanceRes.rows[0] || { balance: 0, earned_today: 0, social_media_mins_unlocked: 0 };
+        const bal = balanceRes.rows[0] || { balance: 0, earned_today: 0, social_media_mins_unlocked: 0 };
+        return {
+          balance:                    bal.balance,
+          earned_today:               bal.earned_today,
+          social_media_mins_unlocked: bal.social_media_mins_unlocked,
+          token_history:              historyRes.rows,
+        };
+      },
+      CACHE_TTL.TOKEN_BALANCE
+    );
 
-    res.json({
-      success: true,
-      balance: bal.balance,
-      earned_today: bal.earned_today,
-      social_media_mins_unlocked: bal.social_media_mins_unlocked,
-      token_history: historyRes.rows,
-    });
+    res.json({ success: true, ...data });
   } catch (err) {
     next(err);
   }
 };
 
-// ── POST /api/reward/social-media/unlock ──────────────────────────────────────
+// â”€â”€ POST /api/reward/social-media/unlock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const unlockSocialMedia = async (req, res, next) => {
   try {
     const { student_id } = req.user;
@@ -216,12 +238,15 @@ const unlockSocialMedia = async (req, res, next) => {
       app_name,
       message: `Enjoy ${minutes_requested} minutes of ${app_name}! You have ${remaining} mins left.`,
     });
+
+    // Invalidate token balance cache after unlock
+    await cache.invalidate(CACHE_KEYS.TOKEN_BALANCE(student_id));
   } catch (err) {
     next(err);
   }
 };
 
-// ── GET /api/reward/streak ────────────────────────────────────────────────────
+// â”€â”€ GET /api/reward/streak â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getStreak = async (req, res, next) => {
   try {
     const { student_id } = req.user;
@@ -286,7 +311,7 @@ const getStreak = async (req, res, next) => {
   }
 };
 
-// ── POST /api/reward/daily-reset ─────────────────────────────────────────────
+// â”€â”€ POST /api/reward/daily-reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const dailyReset = async (req, res, next) => {
   try {
     // Reset earned_today and expire unused social media minutes
@@ -313,7 +338,7 @@ const dailyReset = async (req, res, next) => {
       );
     }
 
-    console.log(`[daily-reset] Reset ${resetCount} student records.`);
+    logger.info(`[daily-reset] Reset ${resetCount} student records.`);
 
     res.json({
       success: true,

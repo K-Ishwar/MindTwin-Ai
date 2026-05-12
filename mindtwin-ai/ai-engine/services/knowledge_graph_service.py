@@ -278,6 +278,95 @@ class KnowledgeGraphService:
             })
         return out
 
+    def get_available_subjects(self, board: str, grade: str) -> list[dict]:
+        """
+        Return all subjects that have a loaded knowledge graph for the given
+        board and grade combination.
+
+        Example: get_available_subjects("CBSE", "Class 12")
+        → [{"subject": "Mathematics", "topic_count": 12}, ...]
+        """
+        board_norm = board.strip().lower().replace(" ", "")
+        grade_norm = grade.strip().lower().replace(" ", "")
+
+        results = []
+        for key, data in self.metadata.items():
+            kb = data.get("board", "").strip().lower().replace(" ", "")
+            kg = data.get("grade", "").strip().lower().replace(" ", "")
+            if kb == board_norm and kg == grade_norm:
+                results.append({
+                    "subject":     data.get("subject"),
+                    "board":       data.get("board"),
+                    "grade":       data.get("grade"),
+                    "topic_count": len(data.get("topics", [])),
+                    "key":         key,
+                })
+        return results
+
+    def get_cross_subject_dependencies(
+        self, subject_list: list[str], board: str, grade: str
+    ) -> list[dict]:
+        """
+        Find topics that appear as prerequisites ACROSS multiple subjects —
+        useful for PCMB students to understand shared foundational concepts.
+
+        Algorithm:
+            1. For each subject, collect all topic IDs and their names.
+            2. For each topic, check if its name (normalised) appears as a
+               prerequisite concept in another subject's graph.
+            3. Return cross-subject dependency pairs.
+
+        Returns:
+            list of {
+                topic_id:        str,
+                topic_name:      str,
+                source_subject:  str,
+                used_in_subject: str,
+                used_in_topic:   str,
+            }
+        """
+        cross_deps = []
+
+        # Build name → (topic_id, subject) map for all subjects
+        name_map: dict[str, list[dict]] = defaultdict(list)
+        for subject in subject_list:
+            G = self._get_graph(subject, board, grade)
+            if G is None:
+                continue
+            for tid in G.nodes:
+                name = G.nodes[tid].get("name", "").strip().lower()
+                name_map[name].append({
+                    "topic_id": tid,
+                    "subject":  subject,
+                    "name":     G.nodes[tid].get("name", tid),
+                })
+
+        # Find names that appear in more than one subject
+        for name, entries in name_map.items():
+            if len(entries) > 1:
+                subjects_involved = {e["subject"] for e in entries}
+                for entry in entries:
+                    for other in entries:
+                        if other["subject"] != entry["subject"]:
+                            cross_deps.append({
+                                "topic_id":        entry["topic_id"],
+                                "topic_name":      entry["name"],
+                                "source_subject":  entry["subject"],
+                                "used_in_subject": other["subject"],
+                                "used_in_topic":   other["name"],
+                            })
+
+        # Deduplicate
+        seen = set()
+        unique = []
+        for d in cross_deps:
+            key = (d["topic_id"], d["used_in_subject"])
+            if key not in seen:
+                seen.add(key)
+                unique.append(d)
+
+        return unique
+
 
 # ── Module-level singleton ────────────────────────────────────────────────────
 _service_instance: KnowledgeGraphService | None = None

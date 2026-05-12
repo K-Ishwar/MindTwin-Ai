@@ -7,16 +7,22 @@ services:
       POSTGRES_DB: mindtwin_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    networks:
+      - mindtwin-network
 
   mongodb:
     image: mongo:7
     ports:
       - "27017:27017"
+    networks:
+      - mindtwin-network
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+    networks:
+      - mindtwin-network
 
   nginx:
     image: nginx:alpine
@@ -24,6 +30,8 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - mindtwin-network
 
   ai-engine:
     build: ./ai-engine
@@ -31,6 +39,10 @@ services:
       - "8000:8000"
     env_file:
       - .env.example
+    environment:
+      - SERVICE_NAME=ai-engine
+    networks:
+      - mindtwin-network
 
   auth-service:
     build: ./backend/auth-service
@@ -40,6 +52,9 @@ services:
       - .env.example
     environment:
       - PORT=3001
+      - SERVICE_NAME=auth-service
+    networks:
+      - mindtwin-network
 
   profile-service:
     build: ./backend/profile-service
@@ -49,6 +64,9 @@ services:
       - .env.example
     environment:
       - PORT=3002
+      - SERVICE_NAME=profile-service
+    networks:
+      - mindtwin-network
 
   scheduler-service:
     build: ./backend/scheduler-service
@@ -58,6 +76,9 @@ services:
       - .env.example
     environment:
       - PORT=3003
+      - SERVICE_NAME=scheduler-service
+    networks:
+      - mindtwin-network
 
   quiz-service:
     build: ./backend/quiz-service
@@ -67,6 +88,9 @@ services:
       - .env.example
     environment:
       - PORT=3004
+      - SERVICE_NAME=quiz-service
+    networks:
+      - mindtwin-network
 
   stress-service:
     build: ./backend/stress-service
@@ -76,6 +100,9 @@ services:
       - .env.example
     environment:
       - PORT=3005
+      - SERVICE_NAME=stress-service
+    networks:
+      - mindtwin-network
 
   reward-service:
     build: ./backend/reward-service
@@ -85,6 +112,9 @@ services:
       - .env.example
     environment:
       - PORT=3006
+      - SERVICE_NAME=reward-service
+    networks:
+      - mindtwin-network
 
   notification-service:
     build: ./backend/notification-service
@@ -94,3 +124,60 @@ services:
       - .env.example
     environment:
       - PORT=3007
+      - SERVICE_NAME=notification-service
+    networks:
+      - mindtwin-network
+
+  analytics-service:
+    build: ./backend/analytics-service
+    ports:
+      - "3008:3008"
+    env_file:
+      - .env.example
+    environment:
+      - PORT=3008
+      - SERVICE_NAME=analytics-service
+    networks:
+      - mindtwin-network
+
+  # ── Observability stack ────────────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    networks:
+      - mindtwin-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3100:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=mindtwin2025
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3100
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - mindtwin-network
+
+networks:
+  mindtwin-network:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:

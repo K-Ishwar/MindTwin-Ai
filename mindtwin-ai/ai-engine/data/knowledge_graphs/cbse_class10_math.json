@@ -1,0 +1,133 @@
+{
+  "subject": "Mathematics",
+  "board": "CBSE",
+  "grade": "Class 10",
+  "topics": [
+    {
+      "id": "math_10_cbse_001",
+      "name": "Real Numbers",
+      "prerequisites": [],
+      "weightage_percent": 6,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_002",
+      "name": "Polynomials",
+      "prerequisites": ["math_10_cbse_001"],
+      "weightage_percent": 7,
+      "estimated_hours": 7,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_003",
+      "name": "Pair of Linear Equations in Two Variables",
+      "prerequisites": ["math_10_cbse_001"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_004",
+      "name": "Quadratic Equations",
+      "prerequisites": ["math_10_cbse_002", "math_10_cbse_003"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_005",
+      "name": "Arithmetic Progressions",
+      "prerequisites": ["math_10_cbse_001"],
+      "weightage_percent": 8,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_006",
+      "name": "Triangles",
+      "prerequisites": [],
+      "weightage_percent": 9,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_007",
+      "name": "Coordinate Geometry",
+      "prerequisites": ["math_10_cbse_003"],
+      "weightage_percent": 8,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_008",
+      "name": "Introduction to Trigonometry",
+      "prerequisites": ["math_10_cbse_006"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_009",
+      "name": "Some Applications of Trigonometry",
+      "prerequisites": ["math_10_cbse_008"],
+      "weightage_percent": 6,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_010",
+      "name": "Circles",
+      "prerequisites": ["math_10_cbse_006"],
+      "weightage_percent": 7,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_011",
+      "name": "Areas Related to Circles",
+      "prerequisites": ["math_10_cbse_010"],
+      "weightage_percent": 6,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_10_cbse_012",
+      "name": "Surface Areas and Volumes",
+      "prerequisites": ["math_10_cbse_011"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_013",
+      "name": "Statistics",
+      "prerequisites": ["math_10_cbse_001"],
+      "weightage_percent": 9,
+      "estimated_hours": 9,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_10_cbse_014",
+      "name": "Probability",
+      "prerequisites": ["math_10_cbse_013"],
+      "weightage_percent": 6,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    }
+  ]
+}

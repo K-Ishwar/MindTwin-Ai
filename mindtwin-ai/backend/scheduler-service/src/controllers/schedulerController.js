@@ -1,11 +1,18 @@
-const axios = require('axios');
-const db = require('../config/db');
-const svc = require('../utils/serviceClients');
+﻿'use strict';
+
+
+const logger = require('../../../../shared/logger');\nconst axios = require('axios');
+const db    = require('../config/db');
+const svc   = require('../utils/serviceClients');
+const redis = require('../config/redis');
+const { createCacheService, CACHE_KEYS, CACHE_TTL } = require('../../../../shared/cache/cacheService');
 
 const PROFILE_SERVICE_URL = process.env.PROFILE_SERVICE_URL || 'http://profile-service:3002';
-const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://ai-engine:8000';
+const AI_ENGINE_URL       = process.env.AI_ENGINE_URL       || 'http://ai-engine:8000';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const cache = createCacheService(redis);
+
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const authAxios = (token) =>
   axios.create({ headers: { Authorization: `Bearer ${token}` } });
@@ -56,7 +63,7 @@ async function getEnrichedActivePlan(student_id) {
   return { ...plan, plan_data: { ...plan.plan_data, schedule: enrichedSchedule } };
 }
 
-// ── POST /api/scheduler/generate ─────────────────────────────────────────────
+// â”€â”€ POST /api/scheduler/generate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const generatePlan = async (req, res, next) => {
   try {
     const { student_id } = req.user;
@@ -158,6 +165,12 @@ const generatePlan = async (req, res, next) => {
       [student_id, JSON.stringify(scheduleData), 'initial']
     );
 
+    // Invalidate stale plan and today's sessions caches
+    await cache.invalidateMany([
+      CACHE_KEYS.ACTIVE_PLAN(student_id),
+      CACHE_KEYS.TODAY_SESSIONS(student_id),
+    ]);
+
     res.json({
       success: true,
       plan_id: insertResult.rows[0].id,
@@ -169,86 +182,95 @@ const generatePlan = async (req, res, next) => {
   }
 };
 
-// ── GET /api/scheduler/plan ───────────────────────────────────────────────────
+// â”€â”€ GET /api/scheduler/plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getActivePlan = async (req, res, next) => {
   try {
     const { student_id } = req.user;
-    const plan = await getEnrichedActivePlan(student_id);
 
-    if (!plan) {
+    const result = await cache.getOrSet(
+      CACHE_KEYS.ACTIVE_PLAN(student_id),
+      async () => {
+        const plan = await getEnrichedActivePlan(student_id);
+        if (!plan) return null;
+
+        const todayDate = today();
+        const enrichedSchedule = (plan.plan_data.schedule || []).map((day) => ({
+          ...day,
+          is_today: day.date === todayDate,
+        }));
+
+        return {
+          plan_id:           plan.id,
+          generated_at:      plan.generated_at,
+          generation_reason: plan.generation_reason,
+          ...plan.plan_data,
+          schedule: enrichedSchedule,
+        };
+      },
+      CACHE_TTL.ACTIVE_PLAN
+    );
+
+    if (!result) {
       return res.status(404).json({ success: false, error: 'No active study plan found. Generate one first.' });
     }
 
-    // Highlight today's sessions
-    const todayDate = today();
-    const planData = plan.plan_data;
-    const enrichedSchedule = (planData.schedule || []).map((day) => ({
-      ...day,
-      is_today: day.date === todayDate,
-    }));
-
-    res.json({
-      success: true,
-      plan_id: plan.id,
-      generated_at: plan.generated_at,
-      generation_reason: plan.generation_reason,
-      ...planData,
-      schedule: enrichedSchedule,
-    });
+    res.json({ success: true, ...result });
   } catch (err) {
     next(err);
   }
 };
 
-// ── GET /api/scheduler/today ──────────────────────────────────────────────────
+// â”€â”€ GET /api/scheduler/today â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getTodaySessions = async (req, res, next) => {
   try {
     const { student_id } = req.user;
     const todayDate = today();
 
-    const plan = await getEnrichedActivePlan(student_id);
-    if (!plan) {
-      return res.json({ success: true, date: todayDate, sessions: [] });
-    }
+    const result = await cache.getOrSet(
+      CACHE_KEYS.TODAY_SESSIONS(student_id),
+      async () => {
+        const plan = await getEnrichedActivePlan(student_id);
+        if (!plan) return { date: todayDate, sessions: [] };
 
-    // Find today's day in the schedule
-    const todayPlan = (plan.plan_data.schedule || []).find((d) => d.date === todayDate);
-    if (!todayPlan) {
-      return res.json({ success: true, date: todayDate, sessions: [] });
-    }
+        const todayPlan = (plan.plan_data.schedule || []).find((d) => d.date === todayDate);
+        if (!todayPlan) return { date: todayDate, sessions: [] };
 
-    // Cross-reference with study_sessions for completion status
-    const completedResult = await db.query(
-      `SELECT topic_id, skipped, skip_reason
-       FROM study_sessions
-       WHERE student_id = $1 AND DATE(started_at) = $2`,
-      [student_id, todayDate]
+        const completedResult = await db.query(
+          `SELECT topic_id, skipped, skip_reason
+           FROM study_sessions
+           WHERE student_id = $1 AND DATE(started_at) = $2`,
+          [student_id, todayDate]
+        );
+        const completedMap = {};
+        completedResult.rows.forEach((r) => {
+          completedMap[r.topic_id] = r.skipped ? 'skipped' : 'completed';
+        });
+
+        const sessions = (todayPlan.slots || []).map((slot) => ({
+          slot_number:  slot.slot_number,
+          topic_id:     slot.topic_id,
+          topic_name:   slot.topic_name,
+          subject:      slot.subject,
+          duration_min: slot.duration_min,
+          is_revision:  slot.is_revision,
+          start_time:   slot.start_time,
+          status: slot.topic_id
+            ? completedMap[slot.topic_id] || 'pending'
+            : 'free',
+        }));
+
+        return { date: todayDate, sessions };
+      },
+      CACHE_TTL.TODAY_SESSIONS
     );
-    const completedMap = {};
-    completedResult.rows.forEach((r) => {
-      completedMap[r.topic_id] = r.skipped ? 'skipped' : 'completed';
-    });
 
-    const sessions = (todayPlan.slots || []).map((slot) => ({
-      slot_number: slot.slot_number,
-      topic_id: slot.topic_id,
-      topic_name: slot.topic_name,
-      subject: slot.subject,
-      duration_min: slot.duration_min,
-      is_revision: slot.is_revision,
-      start_time: slot.start_time,
-      status: slot.topic_id
-        ? completedMap[slot.topic_id] || 'pending'
-        : 'free',
-    }));
-
-    res.json({ success: true, date: todayDate, sessions });
+    res.json({ success: true, ...result });
   } catch (err) {
     next(err);
   }
 };
 
-// ── POST /api/scheduler/session/complete ─────────────────────────────────────
+// â”€â”€ POST /api/scheduler/session/complete â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const completeSession = async (req, res, next) => {
   try {
     const { student_id } = req.user;
@@ -274,7 +296,7 @@ const completeSession = async (req, res, next) => {
       tokensEarned = rewardRes.data.tokens_earned || 0;
       newBalance = rewardRes.data.new_balance || 0;
     } catch (e) {
-      console.warn('Reward service unavailable (non-critical):', e.message);
+      logger.warn('Reward service unavailable (non-critical):', e.message);
     }
 
     // Update digital twin (fire-and-forget, non-critical)
@@ -284,11 +306,14 @@ const completeSession = async (req, res, next) => {
       mood_after: mood_after || null,
       completed: true,
       planned_duration_min: 90,
-    }).catch((e) => console.warn('Twin update failed (non-critical):', e.message));
+    }).catch((e) => logger.warn('Twin update failed (non-critical):', e.message));
 
     const message = tokensEarned > 0
       ? `Session complete! You earned ${tokensEarned} focus tokens.`
       : 'Session complete! Keep up the great work.';
+
+    // Invalidate today's sessions cache so next GET reflects completion
+    await cache.invalidate(CACHE_KEYS.TODAY_SESSIONS(student_id));
 
     res.json({ success: true, tokens_earned: tokensEarned, new_token_balance: newBalance, message });
   } catch (err) {
@@ -296,7 +321,7 @@ const completeSession = async (req, res, next) => {
   }
 };
 
-// ── POST /api/scheduler/session/skip ─────────────────────────────────────────
+// â”€â”€ POST /api/scheduler/session/skip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const skipSession = async (req, res, next) => {
   try {
     const { student_id } = req.user;
@@ -314,10 +339,10 @@ const skipSession = async (req, res, next) => {
       [student_id, topic_id, skip_reason]
     );
 
-    // If tired/unwell → notify stress-service via serviceClients (fire-and-forget)
+    // If tired/unwell â†’ notify stress-service via serviceClients (fire-and-forget)
     if (['tired', 'unwell'].includes(skip_reason)) {
       svc.logStressTrigger(student_id, skip_reason, 'session_skip')
-        .catch((e) => console.warn('Stress service unavailable (non-critical):', e.message));
+        .catch((e) => logger.warn('Stress service unavailable (non-critical):', e.message));
     }
 
     // Find next scheduled date for this topic from the active plan
@@ -337,8 +362,11 @@ const skipSession = async (req, res, next) => {
     // Fire-and-forget replan for tired/unwell
     if (['tired', 'unwell'].includes(skip_reason)) {
       _triggerAsyncReplan(student_id, req.header('Authorization'), 'stress_high')
-        .catch((e) => console.warn('Background replan failed:', e.message));
+        .catch((e) => logger.warn('Background replan failed:', e.message));
     }
+
+    // Invalidate today's sessions cache so next GET reflects the skip
+    await cache.invalidate(CACHE_KEYS.TODAY_SESSIONS(student_id));
 
     res.json({
       success: true,
@@ -352,7 +380,7 @@ const skipSession = async (req, res, next) => {
   }
 };
 
-// ── POST /api/scheduler/replan ────────────────────────────────────────────────
+// â”€â”€ POST /api/scheduler/replan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const replan = async (req, res, next) => {
   try {
     const { student_id } = req.user;
@@ -373,9 +401,15 @@ const replan = async (req, res, next) => {
           data: { gap_topic_ids }
         }, { headers: { 'x-api-key': process.env.INTERNAL_API_KEY || 'internal-secret' }});
       } catch (e) {
-        console.warn('Failed to send notification:', e.message);
+        logger.warn('Failed to send notification:', e.message);
       }
     }
+
+    // Invalidate plan and today's sessions caches â€” new plan was generated
+    await cache.invalidateMany([
+      CACHE_KEYS.ACTIVE_PLAN(student_id),
+      CACHE_KEYS.TODAY_SESSIONS(student_id),
+    ]);
 
     res.json({ success: true, reason, schedule, coverage_stats, warnings });
   } catch (err) {
@@ -383,7 +417,7 @@ const replan = async (req, res, next) => {
   }
 };
 
-// ── Internal: shared replan logic ─────────────────────────────────────────────
+// â”€â”€ Internal: shared replan logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function _triggerAsyncReplan(student_id, authHeader, reason, gap_topic_ids = []) {
   const api = axios.create({ headers: { Authorization: authHeader } });
 

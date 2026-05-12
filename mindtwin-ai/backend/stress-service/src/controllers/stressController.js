@@ -1,25 +1,29 @@
-const db = require('../config/db');
+﻿const logger = require('../../../../shared/logger');\nconst db = require('../config/db');
 const redisClient = require('../config/redis');
 const axios = require('axios');
+const { createCacheService, CACHE_KEYS, CACHE_TTL } = require('../../../../shared/cache/cacheService');
 
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://ai-engine:8000';
 const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://scheduler-service:3005';
-const REWARD_URL = process.env.REWARD_SERVICE_URL || 'http://reward-service:3006';
-const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || 'internal-secret';
+const REWARD_URL    = process.env.REWARD_SERVICE_URL    || 'http://reward-service:3006';
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY   || 'internal-secret';
+
+const cache = createCacheService(redisClient);
 
 exports.getCurrentStress = async (req, res, next) => {
   try {
     const { student_id } = req.user;
-    const cacheKey = `stress:${student_id}`;
 
+    // Use standardised cache key (STRESS_CURRENT) with 30-min TTL
     let result;
+    const cacheKey = CACHE_KEYS.STRESS_CURRENT(student_id);
     const cached = await redisClient.get(cacheKey);
     if (cached) {
       result = JSON.parse(cached);
     } else {
       const { data } = await axios.post(`${AI_ENGINE_URL}/api/ai/stress/predict/${student_id}`);
       result = data;
-      await redisClient.setEx(cacheKey, 1800, JSON.stringify(result)); // 30 mins
+      await redisClient.set(cacheKey, JSON.stringify(result), { EX: CACHE_TTL.STRESS_CURRENT });
     }
 
     // Enrich with exam info
@@ -54,8 +58,15 @@ exports.getCurrentStress = async (req, res, next) => {
       days_to_nearest_exam,
       plan_adjustments_made
     });
+
+    // Increment stress prediction metric
+    try {
+      const { stressPredictionsTotal } = require('../../../../shared/metrics');
+      const severity = result?.severity || result?.severity_tomorrow || 'unknown';
+      stressPredictionsTotal.inc({ severity });
+    } catch (_) { /* metrics not critical */ }
   } catch (err) {
-    console.error('Error fetching current stress:', err.message);
+    logger.error('Error fetching current stress:', err.message);
     res.status(500).json({ success: false, error: 'Failed to fetch current stress' });
   }
 };
@@ -66,7 +77,7 @@ exports.getStressHistory = async (req, res, next) => {
     const { data } = await axios.get(`${AI_ENGINE_URL}/api/ai/stress/history/${student_id}`);
     res.json({ success: true, ...data });
   } catch (err) {
-    console.error('Error fetching stress history:', err.message);
+    logger.error('Error fetching stress history:', err.message);
     res.status(500).json({ success: false, error: 'Failed to fetch stress history' });
   }
 };
@@ -82,13 +93,13 @@ exports.logMood = async (req, res, next) => {
       notes
     });
 
-    // Invalidate cache
-    const cacheKey = `stress:${student_id}`;
+    // Invalidate stress cache using standardised key
+    const cacheKey = CACHE_KEYS.STRESS_CURRENT(student_id);
     await redisClient.del(cacheKey);
 
     res.json({ success: true, ...data });
   } catch (err) {
-    console.error('Error logging mood:', err.message);
+    logger.error('Error logging mood:', err.message);
     res.status(500).json({ success: false, error: 'Failed to log mood' });
   }
 };
@@ -98,8 +109,8 @@ exports.acknowledgeIntervention = async (req, res, next) => {
     const { student_id } = req.user;
     const { intervention_type, action, action_taken } = req.body;
 
-    // Get current stress for logging
-    const cacheKey = `stress:${student_id}`;
+    // Get current stress for logging â€” use standardised key
+    const cacheKey = CACHE_KEYS.STRESS_CURRENT(student_id);
     let stress_score_at_time = null;
     const cached = await redisClient.get(cacheKey);
     if (cached) {
@@ -126,7 +137,7 @@ exports.acknowledgeIntervention = async (req, res, next) => {
           }, { headers: { 'x-api-key': INTERNAL_API_KEY }});
           message = "Breathing exercise completed. 5 bonus tokens awarded!";
         } catch (e) {
-          console.error("Failed to award tokens:", e.message);
+          logger.error("Failed to award tokens:", e.message);
         }
       }
 
@@ -138,14 +149,14 @@ exports.acknowledgeIntervention = async (req, res, next) => {
           }, { headers: { Authorization: token }});
           message += " Study plan has been reduced to ease load.";
         } catch (e) {
-          console.error("Failed to trigger scheduler replan:", e.message);
+          logger.error("Failed to trigger scheduler replan:", e.message);
         }
       }
     }
 
     res.json({ success: true, tokens_awarded, message });
   } catch (err) {
-    console.error('Error acknowledging intervention:', err.message);
+    logger.error('Error acknowledging intervention:', err.message);
     res.status(500).json({ success: false, error: 'Failed to acknowledge intervention' });
   }
 };
@@ -189,7 +200,7 @@ exports.getWellnessSummary = async (req, res, next) => {
       recommended_actions
     });
   } catch (err) {
-    console.error('Error getting wellness summary:', err.message);
+    logger.error('Error getting wellness summary:', err.message);
     res.status(500).json({ success: false, error: 'Failed to get wellness summary' });
   }
 };

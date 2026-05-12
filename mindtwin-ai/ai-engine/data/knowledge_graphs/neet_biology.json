@@ -1,0 +1,349 @@
+{
+  "subject": "Biology",
+  "board": "NEET",
+  "grade": "UG",
+  "topics": [
+    {
+      "id": "bio_neet_001",
+      "name": "The Living World",
+      "prerequisites": [],
+      "weightage_percent": 2,
+      "estimated_hours": 4,
+      "difficulty_level": 1,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_002",
+      "name": "Biological Classification",
+      "prerequisites": ["bio_neet_001"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_003",
+      "name": "Plant Kingdom",
+      "prerequisites": ["bio_neet_002"],
+      "weightage_percent": 4,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_004",
+      "name": "Animal Kingdom",
+      "prerequisites": ["bio_neet_002"],
+      "weightage_percent": 4,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_005",
+      "name": "Morphology of Flowering Plants",
+      "prerequisites": ["bio_neet_003"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_006",
+      "name": "Anatomy of Flowering Plants",
+      "prerequisites": ["bio_neet_005"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_007",
+      "name": "Structural Organisation in Animals",
+      "prerequisites": ["bio_neet_004"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_008",
+      "name": "Cell The Unit of Life",
+      "prerequisites": ["bio_neet_001"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_009",
+      "name": "Biomolecules",
+      "prerequisites": ["bio_neet_008"],
+      "weightage_percent": 4,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_010",
+      "name": "Cell Cycle and Cell Division",
+      "prerequisites": ["bio_neet_008"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_011",
+      "name": "Transport in Plants",
+      "prerequisites": ["bio_neet_006"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_012",
+      "name": "Mineral Nutrition",
+      "prerequisites": ["bio_neet_011"],
+      "weightage_percent": 2,
+      "estimated_hours": 4,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_013",
+      "name": "Photosynthesis in Higher Plants",
+      "prerequisites": ["bio_neet_009"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_014",
+      "name": "Respiration in Plants",
+      "prerequisites": ["bio_neet_013"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_015",
+      "name": "Plant Growth and Development",
+      "prerequisites": ["bio_neet_011"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_016",
+      "name": "Digestion and Absorption",
+      "prerequisites": ["bio_neet_007"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_017",
+      "name": "Breathing and Exchange of Gases",
+      "prerequisites": ["bio_neet_007"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_018",
+      "name": "Body Fluids and Circulation",
+      "prerequisites": ["bio_neet_007"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_019",
+      "name": "Excretory Products and Elimination",
+      "prerequisites": ["bio_neet_018"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_020",
+      "name": "Locomotion and Movement",
+      "prerequisites": ["bio_neet_007"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_021",
+      "name": "Neural Control and Coordination",
+      "prerequisites": ["bio_neet_007"],
+      "weightage_percent": 4,
+      "estimated_hours": 8,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_022",
+      "name": "Chemical Coordination and Integration",
+      "prerequisites": ["bio_neet_021"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_023",
+      "name": "Reproduction in Organisms",
+      "prerequisites": ["bio_neet_010"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_024",
+      "name": "Sexual Reproduction in Flowering Plants",
+      "prerequisites": ["bio_neet_023"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_025",
+      "name": "Human Reproduction",
+      "prerequisites": ["bio_neet_023"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_026",
+      "name": "Reproductive Health",
+      "prerequisites": ["bio_neet_025"],
+      "weightage_percent": 2,
+      "estimated_hours": 4,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_027",
+      "name": "Principles of Inheritance and Variation",
+      "prerequisites": ["bio_neet_010"],
+      "weightage_percent": 6,
+      "estimated_hours": 11,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_028",
+      "name": "Molecular Basis of Inheritance",
+      "prerequisites": ["bio_neet_027"],
+      "weightage_percent": 6,
+      "estimated_hours": 11,
+      "difficulty_level": 5,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_029",
+      "name": "Evolution",
+      "prerequisites": ["bio_neet_027"],
+      "weightage_percent": 4,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_030",
+      "name": "Human Health and Disease",
+      "prerequisites": ["bio_neet_018"],
+      "weightage_percent": 5,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_031",
+      "name": "Strategies for Enhancement in Food Production",
+      "prerequisites": ["bio_neet_027"],
+      "weightage_percent": 2,
+      "estimated_hours": 4,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_032",
+      "name": "Microbes in Human Welfare",
+      "prerequisites": ["bio_neet_030"],
+      "weightage_percent": 3,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_033",
+      "name": "Biotechnology Principles and Processes",
+      "prerequisites": ["bio_neet_028"],
+      "weightage_percent": 4,
+      "estimated_hours": 8,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_034",
+      "name": "Biotechnology and its Applications",
+      "prerequisites": ["bio_neet_033"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_035",
+      "name": "Organisms and Populations",
+      "prerequisites": ["bio_neet_001"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_036",
+      "name": "Ecosystem",
+      "prerequisites": ["bio_neet_035"],
+      "weightage_percent": 3,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "bio_neet_037",
+      "name": "Biodiversity and Conservation",
+      "prerequisites": ["bio_neet_035"],
+      "weightage_percent": 2,
+      "estimated_hours": 4,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "bio_neet_038",
+      "name": "Environmental Issues",
+      "prerequisites": ["bio_neet_036"],
+      "weightage_percent": 2,
+      "estimated_hours": 4,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    }
+  ]
+}

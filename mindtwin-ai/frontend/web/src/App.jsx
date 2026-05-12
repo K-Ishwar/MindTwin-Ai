@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard';
 import QuizPage from './pages/QuizPage';
 import GapReportPage from './pages/GapReportPage';
 import StressPage from './pages/StressPage';
+import ProgressPage from './pages/ProgressPage';
+import KnowledgeGraphPage from './pages/KnowledgeGraphPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,12 +50,13 @@ export default function App() {
             />
 
             {/* Quiz & Gap pages */}
-            <Route path="/quiz"     element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
-            <Route path="/gaps"     element={<ProtectedRoute><GapReportPage /></ProtectedRoute>} />
-            <Route path="/stress"   element={<ProtectedRoute><StressPage /></ProtectedRoute>} />
+            <Route path="/quiz"           element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
+            <Route path="/gaps"           element={<ProtectedRoute><GapReportPage /></ProtectedRoute>} />
+            <Route path="/stress"         element={<ProtectedRoute><StressPage /></ProtectedRoute>} />
+            <Route path="/knowledge-map"  element={<ProtectedRoute><KnowledgeGraphPage /></ProtectedRoute>} />
 
             {/* Future pages — stubs */}
-            <Route path="/progress" element={<ProtectedRoute><PlaceholderPage title="My Progress"  emoji="📈" /></ProtectedRoute>} />
+            <Route path="/progress" element={<ProtectedRoute><ProgressPage /></ProtectedRoute>} />
             <Route path="/rewards"  element={<ProtectedRoute><PlaceholderPage title="Rewards"      emoji="🎁" /></ProtectedRoute>} />
             <Route path="/profile"  element={<ProtectedRoute><PlaceholderPage title="Profile"      emoji="👤" /></ProtectedRoute>} />
 

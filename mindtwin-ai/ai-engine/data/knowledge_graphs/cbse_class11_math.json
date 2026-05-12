@@ -1,0 +1,142 @@
+{
+  "subject": "Mathematics",
+  "board": "CBSE",
+  "grade": "Class 11",
+  "topics": [
+    {
+      "id": "math_11_cbse_001",
+      "name": "Sets",
+      "prerequisites": [],
+      "weightage_percent": 5,
+      "estimated_hours": 6,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_002",
+      "name": "Relations and Functions",
+      "prerequisites": ["math_11_cbse_001"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_003",
+      "name": "Trigonometric Functions",
+      "prerequisites": ["math_11_cbse_002"],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_004",
+      "name": "Principle of Mathematical Induction",
+      "prerequisites": ["math_11_cbse_001"],
+      "weightage_percent": 4,
+      "estimated_hours": 5,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_11_cbse_005",
+      "name": "Complex Numbers and Quadratic Equations",
+      "prerequisites": ["math_11_cbse_002"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_006",
+      "name": "Linear Inequalities",
+      "prerequisites": ["math_11_cbse_002"],
+      "weightage_percent": 5,
+      "estimated_hours": 5,
+      "difficulty_level": 2,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_11_cbse_007",
+      "name": "Permutations and Combinations",
+      "prerequisites": ["math_11_cbse_001"],
+      "weightage_percent": 6,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_008",
+      "name": "Binomial Theorem",
+      "prerequisites": ["math_11_cbse_007"],
+      "weightage_percent": 6,
+      "estimated_hours": 7,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_009",
+      "name": "Sequences and Series",
+      "prerequisites": ["math_11_cbse_002"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_010",
+      "name": "Straight Lines",
+      "prerequisites": ["math_11_cbse_002"],
+      "weightage_percent": 7,
+      "estimated_hours": 8,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_011",
+      "name": "Conic Sections",
+      "prerequisites": ["math_11_cbse_010"],
+      "weightage_percent": 8,
+      "estimated_hours": 10,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_012",
+      "name": "Introduction to Three Dimensional Geometry",
+      "prerequisites": ["math_11_cbse_010"],
+      "weightage_percent": 5,
+      "estimated_hours": 6,
+      "difficulty_level": 3,
+      "exam_importance": "medium"
+    },
+    {
+      "id": "math_11_cbse_013",
+      "name": "Limits and Derivatives",
+      "prerequisites": ["math_11_cbse_002", "math_11_cbse_003"],
+      "weightage_percent": 11,
+      "estimated_hours": 13,
+      "difficulty_level": 4,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_014",
+      "name": "Statistics",
+      "prerequisites": ["math_11_cbse_001"],
+      "weightage_percent": 6,
+      "estimated_hours": 7,
+      "difficulty_level": 2,
+      "exam_importance": "high"
+    },
+    {
+      "id": "math_11_cbse_015",
+      "name": "Probability",
+      "prerequisites": ["math_11_cbse_007", "math_11_cbse_014"],
+      "weightage_percent": 8,
+      "estimated_hours": 9,
+      "difficulty_level": 3,
+      "exam_importance": "high"
+    }
+  ]
+}
