@@ -1,5 +1,6 @@
 ﻿const logger = require('../../../../shared/logger');\nconst db = require('../config/db');
 const axios = require('axios');
+const { sendNotification } = require('../../../shared/utils/notifyClient');
 
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://ai-engine:8000';
 
@@ -155,6 +156,9 @@ const submitAttempt = async (req, res, next) => {
     const attempt_id = insertResult.rows[0].id;
 
     if (gap_detected) {
+      // Notify student about the gap
+      sendNotification('student', student_id, 'gap_detected', { topic_name: topicName }, { topic_id });
+
       try {
         const token = req.header('Authorization').split(' ')[1];
         await axios.post(`${process.env.SCHEDULER_SERVICE_URL || 'http://scheduler-service:3005'}/api/scheduler/replan`, {

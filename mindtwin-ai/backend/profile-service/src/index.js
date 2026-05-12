@@ -4,12 +4,18 @@ const helmet     = require('helmet');
 const compression = require('compression');
 require('dotenv').config();
 
+<<<<<<< HEAD
 process.env.SERVICE_NAME = 'profile-service';
 const logger         = require('../../../shared/logger');
 const requestLogger  = require('../../../shared/middleware/requestLogger');
 const globalErrorHandler = require('../../../shared/middleware/errorHandler');
 const { metricsMiddleware } = require('../../../shared/metrics');\n
 const profileRoutes = require('./routes/profileRoutes');
+=======
+const profileRoutes  = require('./routes/profileRoutes');
+const guardianRoutes = require('./routes/guardianRoutes');
+const adminRoutes    = require('./routes/adminRoutes');
+>>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
 const app = express();
 
@@ -24,7 +30,9 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'profile-service' });
 });
 
-app.use('/api/profile', profileRoutes);
+app.use('/api/profile',          profileRoutes);
+app.use('/api/profile/guardian', guardianRoutes);
+app.use('/api/profile/admin',    adminRoutes);
 
 app.use(globalErrorHandler);
 

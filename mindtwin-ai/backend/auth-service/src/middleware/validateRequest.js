@@ -8,6 +8,8 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
+// ─── Student validations ──────────────────────────────────────────────────────
+
 const registerValidation = [
   check('name',        'Name is required').notEmpty(),
   check('email',       'Please include a valid email').isEmail(),
@@ -32,10 +34,43 @@ const otpValidation = [
     .isNumeric(),
 ];
 
+// ─── Guardian validations ─────────────────────────────────────────────────────
+
+const guardianRegisterValidation = [
+  check('name', 'Name is required').notEmpty().trim(),
+  check('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  check('password', 'Please enter a password with 8 or more characters').isLength({ min: 8 }),
+  check('role', 'Role must be "parent" or "teacher"').isIn(['parent', 'teacher']),
+  check('institution_name').optional().trim()
+];
+
+const guardianLoginValidation = [
+  check('email', 'Please include a valid email').isEmail().normalizeEmail(),
+  check('password', 'Password is required').exists()
+];
+
+const linkStudentValidation = [
+  check('student_email', 'A valid student email is required').isEmail().normalizeEmail()
+];
+
+const updateGuardianValidation = [
+  check('name').optional().trim().notEmpty().withMessage('Name cannot be blank'),
+  check('institution_name').optional().trim()
+];
+
 module.exports = {
   validateRequest,
+  // Student
   registerValidation,
   loginValidation,
   refreshValidation,
+<<<<<<< HEAD
   otpValidation,
+=======
+  // Guardian
+  guardianRegisterValidation,
+  guardianLoginValidation,
+  updateGuardianValidation,
+  linkStudentValidation
+>>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 };
