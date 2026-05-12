@@ -72,3 +72,25 @@ exports.markRead = async (req, res, next) => {
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
+
+// POST /api/notifications/register-token
+exports.registerToken = async (req, res, next) => {
+  try {
+    const { student_id } = req.user;
+    const { push_token } = req.body;
+
+    if (!push_token) {
+      return res.status(400).json({ success: false, error: 'push_token is required' });
+    }
+
+    await db.query(
+      `UPDATE students SET push_token = $1 WHERE id = $2`,
+      [push_token, student_id]
+    );
+
+    res.json({ success: true, message: 'Push token registered successfully' });
+  } catch (err) {
+    console.error('Error registering push token:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+};
