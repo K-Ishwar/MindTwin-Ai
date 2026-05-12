@@ -4,7 +4,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const profileRoutes = require('./routes/profileRoutes');
+const profileRoutes  = require('./routes/profileRoutes');
+const guardianRoutes = require('./routes/guardianRoutes');
 
 const app = express();
 
@@ -17,7 +18,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'profile-service' });
 });
 
-app.use('/api/profile', profileRoutes);
+app.use('/api/profile',          profileRoutes);
+app.use('/api/profile/guardian', guardianRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
