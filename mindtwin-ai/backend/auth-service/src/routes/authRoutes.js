@@ -46,4 +46,7 @@ router.delete('/guardian/link/:linkId',        verifyGuardianAuth, authControlle
 // Guardian views approved linked students
 router.get('/guardian/students', verifyGuardianAuth, authController.getMyStudents);
 
+// ─── Admin routes ─────────────────────────────────────────────────────────────
+router.post('/admin/login', authController.adminLogin);
+
 module.exports = router;

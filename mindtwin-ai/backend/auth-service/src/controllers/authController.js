@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const redisClient = require('../config/redis');
+const { sendNotification } = require('../../../shared/utils/notifyClient');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'supersecretrefresh';
@@ -385,6 +386,15 @@ const approveLink = async (req, res, next) => {
       ]
     );
 
+    // Push notification to guardian via FCM
+    sendNotification(
+      'guardian',
+      link.guardian_id,
+      'guardian_linked',
+      { guardian_name: studentName },
+      { link_id: linkId, student_id }
+    );
+
     res.json({ success: true, message: 'Access approved' });
   } catch (err) {
     next(err);
@@ -600,6 +610,41 @@ const getMyStudents = async (req, res, next) => {
   }
 };
 
+/**
+ * POST /api/auth/admin/login
+ * Body: { email, password }
+ */
+const adminLogin = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  try {
+    const result = await db.query('SELECT * FROM admins WHERE email = $1', [email]);
+    if (result.rows.length === 0) {
+      return res.status(400).json({ success: false, error: 'Invalid credentials' });
+    }
+
+    const admin = result.rows[0];
+    const isMatch = await bcrypt.compare(password, admin.password_hash);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, error: 'Invalid credentials' });
+    }
+
+    const accessToken = jwt.sign(
+      { admin_id: admin.id, role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    res.json({
+      success: true,
+      accessToken,
+      admin: { id: admin.id, name: admin.name, email: admin.email },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   // Student
   register,
@@ -618,5 +663,7 @@ module.exports = {
   linkStudent,
   approveLink,
   rejectLink,
-  getMyStudents
+  getMyStudents,
+  // Admin
+  adminLogin,
 };

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { sendNotification } = require('../../../shared/utils/notifyClient');
 
 // ── Token award table ─────────────────────────────────────────────────────────
 // Maps action + context conditions to { tokens, social_mins }
@@ -112,6 +113,21 @@ const awardTokens = async (req, res, next) => {
        VALUES ($1, $2, $3, $4, $5)`,
       [student_id, award.label || action, award.tokens, award.social_mins, row.balance]
     );
+
+    // ── Streak & token milestone notifications ────────────────────────────────
+    // streak_7 milestone
+    if (action === 'streak_7') {
+      sendNotification('student', student_id, 'streak_milestone', { streak_days: 7 });
+    }
+    // token milestone at 100, 500, 1000
+    const MILESTONES = [100, 500, 1000];
+    const prevBalance = row.balance - award.tokens;
+    for (const milestone of MILESTONES) {
+      if (prevBalance < milestone && row.balance >= milestone) {
+        sendNotification('student', student_id, 'token_milestone', { token_count: milestone });
+        break;
+      }
+    }
 
     res.json({
       success: true,
@@ -281,6 +297,19 @@ const getStreak = async (req, res, next) => {
       last_active_date,
       total_study_days: dates.length,
     });
+
+    // Fire streak_at_risk notification if streak > 0 and student hasn't studied today
+    if (current_streak > 0 && last_active_date) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const lastStr  = new Date(last_active_date).toISOString().split('T')[0];
+      if (lastStr < todayStr) {
+        // Derive student_id from req.user (set by auth middleware)
+        const sid = req.user?.student_id;
+        if (sid) {
+          sendNotification('student', sid, 'streak_at_risk', { streak_days: current_streak });
+        }
+      }
+    }
   } catch (err) {
     next(err);
   }

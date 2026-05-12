@@ -5,6 +5,7 @@ from routers.knowledge_graph_router import router as kg_router
 from routers.quiz_router import router as quiz_router
 from routers.stress_router import router as stress_router
 from routers.cron_router import router as cron_router
+from routers.analytics_router import router as analytics_router
 
 from models.lstm_stress_model import StressModelManager
 from services.cron_service import scheduler
@@ -21,6 +22,7 @@ app.include_router(kg_router, prefix="/api/ai/knowledge-graph", tags=["Knowledge
 app.include_router(quiz_router)
 app.include_router(stress_router)
 app.include_router(cron_router)
+app.include_router(analytics_router)
 
 
 @app.on_event("startup")

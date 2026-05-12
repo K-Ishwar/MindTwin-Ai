@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const profileRoutes  = require('./routes/profileRoutes');
 const guardianRoutes = require('./routes/guardianRoutes');
+const adminRoutes    = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/profile',          profileRoutes);
 app.use('/api/profile/guardian', guardianRoutes);
+app.use('/api/profile/admin',    adminRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

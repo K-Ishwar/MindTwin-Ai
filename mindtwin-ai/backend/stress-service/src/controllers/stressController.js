@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const redisClient = require('../config/redis');
 const axios = require('axios');
+const { sendNotification } = require('../../../shared/utils/notifyClient');
 
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://ai-engine:8000';
 const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://scheduler-service:3005';
@@ -46,6 +47,14 @@ exports.getCurrentStress = async (req, res, next) => {
       [student_id]
     );
     const plan_adjustments_made = parseInt(adjRes.rows[0].count) > 0;
+
+    // ── Fire stress notifications (non-blocking) ──────────────────────────────
+    const score = result?.score ?? result?.predictions?.tomorrow ?? 0;
+    if (score >= 0.8) {
+      sendNotification('student', student_id, 'stress_critical');
+    } else if (score >= 0.6) {
+      sendNotification('student', student_id, 'stress_high');
+    }
 
     res.json({
       success: true,

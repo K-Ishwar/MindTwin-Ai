@@ -1,6 +1,7 @@
 const axios = require('axios');
 const db = require('../config/db');
 const svc = require('../utils/serviceClients');
+const { sendNotification } = require('../../../shared/utils/notifyClient');
 
 const PROFILE_SERVICE_URL = process.env.PROFILE_SERVICE_URL || 'http://profile-service:3002';
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://ai-engine:8000';
@@ -364,18 +365,28 @@ const replan = async (req, res, next) => {
     );
 
     if (reason === 'gap_detected') {
-      try {
-        await axios.post(`${process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:3007'}/api/notifications/send`, {
-          student_id,
-          type: 'plan_update',
-          title: 'Study Plan Updated',
-          body: 'Your study plan has been updated based on your quiz results',
-          data: { gap_topic_ids }
-        }, { headers: { 'x-api-key': process.env.INTERNAL_API_KEY || 'internal-secret' }});
-      } catch (e) {
-        console.warn('Failed to send notification:', e.message);
-      }
+      sendNotification('student', student_id, 'plan_updated', {}, { gap_topic_ids });
+    } else if (reason === 'stress_high') {
+      sendNotification('student', student_id, 'plan_updated');
     }
+
+    // Check for upcoming exams within 7 days and fire exam_week notification
+    try {
+      const examRes = await db.query(
+        `SELECT subject, (exam_date::date - CURRENT_DATE) AS days
+         FROM exams
+         WHERE student_id = $1 AND exam_date >= CURRENT_DATE AND (exam_date::date - CURRENT_DATE) <= 7
+         ORDER BY exam_date ASC LIMIT 1`,
+        [student_id]
+      );
+      if (examRes.rows.length > 0) {
+        const exam = examRes.rows[0];
+        sendNotification('student', student_id, 'exam_week', {
+          subject: exam.subject,
+          days: exam.days,
+        });
+      }
+    } catch (_) {}
 
     res.json({ success: true, reason, schedule, coverage_stats, warnings });
   } catch (err) {

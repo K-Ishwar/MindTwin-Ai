@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastProvider } from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
+import GuardianProtectedRoute from './components/GuardianProtectedRoute';
 import { useAuthStore } from './stores/authStore';
 import LoginPage from './pages/LoginPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -9,6 +10,12 @@ import Dashboard from './pages/Dashboard';
 import QuizPage from './pages/QuizPage';
 import GapReportPage from './pages/GapReportPage';
 import StressPage from './pages/StressPage';
+import GuardianLogin from './pages/guardian/GuardianLogin';
+import GuardianRegister from './pages/guardian/GuardianRegister';
+import GuardianDashboard from './pages/guardian/GuardianDashboard';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,7 +37,7 @@ export default function App() {
               element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />}
             />
 
-            {/* Auth */}
+            {/* ── Student auth ── */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<Navigate to="/onboarding" replace />} />
 
@@ -48,14 +55,37 @@ export default function App() {
             />
 
             {/* Quiz & Gap pages */}
-            <Route path="/quiz"     element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
-            <Route path="/gaps"     element={<ProtectedRoute><GapReportPage /></ProtectedRoute>} />
-            <Route path="/stress"   element={<ProtectedRoute><StressPage /></ProtectedRoute>} />
+            <Route path="/quiz"   element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
+            <Route path="/gaps"   element={<ProtectedRoute><GapReportPage /></ProtectedRoute>} />
+            <Route path="/stress" element={<ProtectedRoute><StressPage /></ProtectedRoute>} />
 
-            {/* Future pages — stubs */}
-            <Route path="/progress" element={<ProtectedRoute><PlaceholderPage title="My Progress"  emoji="📈" /></ProtectedRoute>} />
-            <Route path="/rewards"  element={<ProtectedRoute><PlaceholderPage title="Rewards"      emoji="🎁" /></ProtectedRoute>} />
-            <Route path="/profile"  element={<ProtectedRoute><PlaceholderPage title="Profile"      emoji="👤" /></ProtectedRoute>} />
+            {/* Future student pages — stubs */}
+            <Route path="/progress" element={<ProtectedRoute><PlaceholderPage title="My Progress" emoji="📈" /></ProtectedRoute>} />
+            <Route path="/rewards"  element={<ProtectedRoute><PlaceholderPage title="Rewards"     emoji="🎁" /></ProtectedRoute>} />
+            <Route path="/profile"  element={<ProtectedRoute><PlaceholderPage title="Profile"     emoji="👤" /></ProtectedRoute>} />
+
+            {/* ── Guardian portal ── */}
+            <Route path="/guardian/login"    element={<GuardianLogin />} />
+            <Route path="/guardian/register" element={<GuardianRegister />} />
+            <Route
+              path="/guardian/dashboard"
+              element={
+                <GuardianProtectedRoute>
+                  <GuardianDashboard />
+                </GuardianProtectedRoute>
+              }
+            />
+
+            {/* ── Admin portal ── */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              }
+            />
 
             {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />

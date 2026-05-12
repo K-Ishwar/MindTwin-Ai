@@ -54,6 +54,28 @@ export default function Dashboard() {
     refetchNotifs();
   };
 
+  const handleApproveLink = async (linkId, notifId) => {
+    try {
+      await import('../api/axios').then(m => m.default.post(`/api/auth/guardian/approve-link/${linkId}`));
+      toast.success('Access approved!');
+      await dashboardApi.markNotificationRead(notifId);
+      refetchNotifs();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to approve');
+    }
+  };
+
+  const handleRejectLink = async (linkId, notifId) => {
+    try {
+      await import('../api/axios').then(m => m.default.post(`/api/auth/guardian/reject-link/${linkId}`));
+      toast.info('Access rejected.');
+      await dashboardApi.markNotificationRead(notifId);
+      refetchNotifs();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to reject');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0F172A] text-white">
       {/* Red Banner for High Stress */}
@@ -113,13 +135,30 @@ export default function Dashboard() {
                         <div 
                           key={n.id} 
                           className={`p-3 border-b border-slate-700/50 hover:bg-slate-700/30 transition cursor-pointer ${!n.read ? 'bg-indigo-500/5' : ''}`}
-                          onClick={() => { if(!n.read) handleMarkRead(n.id); }}
+                          onClick={() => { if(!n.read && n.type !== 'guardian_link_request') handleMarkRead(n.id); }}
                         >
                           <div className="flex justify-between items-start mb-1">
                             <span className="font-semibold text-sm text-white">{n.title}</span>
-                            {!n.read && <span className="w-2 h-2 rounded-full bg-indigo-500 mt-1"></span>}
+                            {!n.read && <span className="w-2 h-2 rounded-full bg-indigo-500 mt-1 flex-shrink-0"></span>}
                           </div>
                           <p className="text-xs text-slate-400">{n.body}</p>
+                          {/* Approve / Reject for guardian link requests */}
+                          {n.type === 'guardian_link_request' && n.data?.link_id && (
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleApproveLink(n.data.link_id, n.id); }}
+                                className="flex-1 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition"
+                              >
+                                ✓ Approve
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleRejectLink(n.data.link_id, n.id); }}
+                                className="flex-1 py-1 rounded-lg bg-slate-700 hover:bg-red-600 text-slate-300 hover:text-white text-xs font-semibold transition"
+                              >
+                                ✕ Reject
+                              </button>
+                            </div>
+                          )}
                           <span className="text-[10px] text-slate-500 mt-2 block">
                             {new Date(n.created_at).toLocaleString()}
                           </span>
