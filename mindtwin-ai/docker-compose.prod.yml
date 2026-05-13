@@ -1,0 +1,411 @@
+version: '3.9'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MindTwin AI — Production Docker Compose
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+# Requires: .env.prod (never commit this file — see .env.prod.example)
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Reverse Proxy ───────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    restart: always
+    ports:
+      - "127.0.0.1:8080:80"   # bind to loopback only — host NGINX proxies here
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-certs:/etc/nginx/certs:ro
+    depends_on:
+      - auth-service
+      - profile-service
+      - scheduler-service
+      - quiz-service
+      - stress-service
+      - reward-service
+      - notification-service
+      - analytics-service
+      - ai-engine
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Auth Service (port 3001) ─────────────────────────────────────────────────
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - SERVICE_NAME=auth-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Profile Service (port 3002) ──────────────────────────────────────────────
+  profile-service:
+    build:
+      context: ./backend/profile-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3002"
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - SERVICE_NAME=profile-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Scheduler Service (port 3003) ────────────────────────────────────────────
+  scheduler-service:
+    build:
+      context: ./backend/scheduler-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3003"
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - SERVICE_NAME=scheduler-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Quiz Service (port 3004) ─────────────────────────────────────────────────
+  quiz-service:
+    build:
+      context: ./backend/quiz-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3004"
+    environment:
+      - NODE_ENV=production
+      - PORT=3004
+      - SERVICE_NAME=quiz-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Stress Service (port 3005) ───────────────────────────────────────────────
+  stress-service:
+    build:
+      context: ./backend/stress-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3005"
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - SERVICE_NAME=stress-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Reward Service (port 3006) ───────────────────────────────────────────────
+  reward-service:
+    build:
+      context: ./backend/reward-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3006"
+    environment:
+      - NODE_ENV=production
+      - PORT=3006
+      - SERVICE_NAME=reward-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Notification Service (port 3007) ─────────────────────────────────────────
+  notification-service:
+    build:
+      context: ./backend/notification-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3007"
+    environment:
+      - NODE_ENV=production
+      - PORT=3007
+      - SERVICE_NAME=notification-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Analytics Service (port 3008) ────────────────────────────────────────────
+  analytics-service:
+    build:
+      context: ./backend/analytics-service
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "3008"
+    environment:
+      - NODE_ENV=production
+      - PORT=3008
+      - SERVICE_NAME=analytics-service
+    env_file: .env.prod
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── AI Engine (port 8000) ────────────────────────────────────────────────────
+  # Needs more CPU/RAM for LSTM inference and IRT calculations
+  ai-engine:
+    build:
+      context: ./ai-engine
+      dockerfile: Dockerfile.prod
+    restart: always
+    expose:
+      - "8000"
+    environment:
+      - SERVICE_NAME=ai-engine
+    env_file: .env.prod
+    volumes:
+      - ai-models:/app/models/saved   # persist trained model weights across restarts
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s   # model loading takes longer
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── Observability ────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    restart: always
+    expose:
+      - "9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--web.listen-address=0.0.0.0:9090'
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    restart: always
+    expose:
+      - "3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://grafana.mindtwin.ai
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - mindtwin-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  mindtwin-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  ai-models:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  nginx-certs:
+    driver: local
