@@ -1,7 +1,8 @@
-﻿'use strict';
+'use strict';
 
 
-const logger = require('../../../../shared/logger');\nconst bcrypt = require('bcrypt');
+const logger = require('../../../../shared/logger');
+const bcrypt = require('bcrypt');
 const jwt    = require('jsonwebtoken');
 const db     = require('../config/db');
 const redisClient = require('../config/redis');
@@ -10,25 +11,23 @@ const { sendNotification } = require('../../../shared/utils/notifyClient');
 const JWT_SECRET         = process.env.JWT_SECRET         || 'supersecret';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'supersecretrefresh';
 
-<<<<<<< HEAD
 // OTP TTL in seconds (10 minutes)
 const OTP_TTL = 10 * 60;
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const generateTokens = (student_id) => {
-  const accessToken  = jwt.sign({ student_id }, JWT_SECRET,         { expiresIn: '15m' });
-=======
 // ─── Token helpers ────────────────────────────────────────────────────────────
 
 const generateStudentTokens = (student_id) => {
   const accessToken = jwt.sign({ student_id }, JWT_SECRET, { expiresIn: '15m' });
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
   const refreshToken = jwt.sign({ student_id }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
   return { accessToken, refreshToken };
 };
 
-<<<<<<< HEAD
+const generateGuardianTokens = (guardian_id, role) => {
+  const accessToken = jwt.sign({ guardian_id, role }, JWT_SECRET, { expiresIn: '15m' });
+  const refreshToken = jwt.sign({ guardian_id, role }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+  return { accessToken, refreshToken };
+};
+
 /** Generate a cryptographically random 6-digit OTP */
 function generateOTP() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -51,21 +50,12 @@ async function dispatchOTPEmail(student_id, email, name, otp) {
       { headers: { 'x-api-key': INTERNAL_API_KEY }, timeout: 5000 }
     );
   } catch (err) {
-    // Non-fatal â€” OTP is still stored in Redis; user can request resend
+    // Non-fatal — OTP is still stored in Redis; user can request resend
     logger.warn('[authController] OTP email dispatch failed (non-critical):', err.message);
   }
 }
 
-// â”€â”€ POST /api/auth/register â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-=======
-const generateGuardianTokens = (guardian_id, role) => {
-  const accessToken = jwt.sign({ guardian_id, role }, JWT_SECRET, { expiresIn: '15m' });
-  const refreshToken = jwt.sign({ guardian_id, role }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
-  return { accessToken, refreshToken };
-};
-
 // ─── Student Auth ─────────────────────────────────────────────────────────────
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
 const register = async (req, res, next) => {
   const { name, email, password, grade_level, board } = req.body;
@@ -130,13 +120,9 @@ const login = async (req, res, next) => {
 
     const { accessToken, refreshToken } = generateStudentTokens(student.id);
 
-<<<<<<< HEAD
-    await redisClient.set(`refresh:${student.id}`, refreshToken, {
-      EX: 7 * 24 * 60 * 60,
-=======
     await redisClient.set(`refresh:student:${student.id}`, refreshToken, {
       EX: 7 * 24 * 60 * 60
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
+    });
     });
 
     res.json({
@@ -164,14 +150,6 @@ const refreshToken = async (req, res, next) => {
   const { refreshToken } = req.body;
 
   try {
-<<<<<<< HEAD
-    const decoded    = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-    const student_id = decoded.student_id;
-
-    const storedToken = await redisClient.get(`refresh:${student_id}`);
-    if (!storedToken || storedToken !== refreshToken) {
-      return res.status(401).json({ success: false, error: 'Invalid refresh token' });
-=======
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
 
     // Support both student and guardian refresh tokens
@@ -185,16 +163,13 @@ const refreshToken = async (req, res, next) => {
 
       const newAccessToken = jwt.sign({ student_id }, JWT_SECRET, { expiresIn: '15m' });
       return res.json({ success: true, accessToken: newAccessToken });
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
+    }
     }
 
     if (decoded.guardian_id) {
       const { guardian_id, role } = decoded;
       const storedToken = await redisClient.get(`refresh:guardian:${guardian_id}`);
 
-<<<<<<< HEAD
-    res.json({ success: true, accessToken: newAccessToken });
-=======
       if (!storedToken || storedToken !== refreshToken) {
         return res.status(401).json({ success: false, error: 'Invalid refresh token' });
       }
@@ -204,7 +179,6 @@ const refreshToken = async (req, res, next) => {
     }
 
     return res.status(401).json({ success: false, error: 'Invalid refresh token' });
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
   } catch (err) {
     return res.status(401).json({ success: false, error: 'Invalid refresh token' });
   }
@@ -214,17 +188,11 @@ const refreshToken = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-<<<<<<< HEAD
-    const student_id = req.user.student_id;
-    await redisClient.del(`refresh:${student_id}`);
-=======
     if (req.user.student_id) {
       await redisClient.del(`refresh:student:${req.user.student_id}`);
     } else if (req.user.guardian_id) {
       await redisClient.del(`refresh:guardian:${req.user.guardian_id}`);
     }
-
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
     res.json({ success: true, message: 'Logged out' });
   } catch (err) {
     next(err);
@@ -829,10 +797,8 @@ module.exports = {
   refreshToken,
   logout,
   getMe,
-<<<<<<< HEAD
   verifyEmail,
   resendVerification,
-=======
   studentGetGuardianRequests,
   // Guardian
   guardianRegister,
@@ -847,5 +813,4 @@ module.exports = {
   getMyStudents,
   // Admin
   adminLogin,
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 };

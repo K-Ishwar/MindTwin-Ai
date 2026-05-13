@@ -8,6 +8,7 @@ const services = [
   { name: 'stress-service', port: 3005 },
   { name: 'reward-service', port: 3006 },
   { name: 'notification-service', port: 3007 },
+  { name: 'analytics-service', port: 3008 },
   { name: 'ai-engine', port: 8000 },
   { name: 'nginx', port: 80 }
 ];

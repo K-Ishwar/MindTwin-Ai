@@ -6,35 +6,25 @@ const {
   registerValidation,
   loginValidation,
   refreshValidation,
-<<<<<<< HEAD
   otpValidation,
-=======
   guardianRegisterValidation,
   guardianLoginValidation,
   updateGuardianValidation,
   linkStudentValidation
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 } = require('../middleware/validateRequest');
 const auth = require('../middleware/auth');
 const { verifyStudentAuth, verifyGuardianAuth } = require('../middleware/auth');
 
-<<<<<<< HEAD
+// ─── Student routes ───────────────────────────────────────────────────────────
 router.post('/register',             registerValidation, validateRequest, authController.register);
 router.post('/login',                loginValidation,    validateRequest, authController.login);
 router.post('/refresh',              refreshValidation,  validateRequest, authController.refreshToken);
 router.post('/logout',               auth, authController.logout);
-router.get('/me',                    auth, authController.getMe);
+router.get('/me',                    verifyStudentAuth, authController.getMe);
 
 // Email verification
 router.post('/verify-email',         auth, otpValidation, validateRequest, authController.verifyEmail);
 router.post('/resend-verification',  auth, authController.resendVerification);
-=======
-// ─── Student routes ───────────────────────────────────────────────────────────
-router.post('/register',  registerValidation,  validateRequest, authController.register);
-router.post('/login',     loginValidation,     validateRequest, authController.login);
-router.post('/refresh',   refreshValidation,   validateRequest, authController.refreshToken);
-router.post('/logout',    auth,                                 authController.logout);
-router.get('/me',         verifyStudentAuth,                    authController.getMe);
 
 // Student sees all guardian requests addressed to them (pending + history)
 router.get('/student/guardian-requests', verifyStudentAuth, authController.studentGetGuardianRequests);
@@ -63,6 +53,5 @@ router.get('/guardian/students', verifyGuardianAuth, authController.getMyStudent
 
 // ─── Admin routes ─────────────────────────────────────────────────────────────
 router.post('/admin/login', authController.adminLogin);
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
 module.exports = router;

@@ -1,4 +1,4 @@
-﻿const express    = require('express');
+const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
 const compression = require('compression');
@@ -8,7 +8,7 @@ process.env.SERVICE_NAME = 'quiz-service';
 const logger         = require('../../../shared/logger');
 const requestLogger  = require('../../../shared/middleware/requestLogger');
 const globalErrorHandler = require('../../../shared/middleware/errorHandler');
-const { metricsMiddleware } = require('../../../shared/metrics');\n
+const { metricsMiddleware } = require('../../../shared/metrics');
 const quizRoutes = require('./routes/quizRoutes');
 
 const app = express();

@@ -64,13 +64,10 @@ module.exports = {
   registerValidation,
   loginValidation,
   refreshValidation,
-<<<<<<< HEAD
   otpValidation,
-=======
   // Guardian
   guardianRegisterValidation,
   guardianLoginValidation,
   updateGuardianValidation,
   linkStudentValidation
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 };

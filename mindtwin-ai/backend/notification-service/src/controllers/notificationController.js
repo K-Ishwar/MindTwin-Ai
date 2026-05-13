@@ -1,6 +1,6 @@
-<<<<<<< HEAD
-﻿const logger = require('../../../../shared/logger');\nconst db = require('../config/db');
-=======
+'use strict';
+
+const logger = require('../../../../shared/logger');
 const db = require('../config/db');
 const admin = require('../config/firebase');
 
@@ -56,7 +56,6 @@ async function sendFCM(push_token, title, body, data = {}, priority = 'normal') 
   for (const [k, v] of Object.entries(data)) {
     fcmData[k] = typeof v === 'string' ? v : JSON.stringify(v);
   }
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
   try {
     await admin.messaging().send({
@@ -68,7 +67,7 @@ async function sendFCM(push_token, title, body, data = {}, priority = 'normal') 
     });
     return { sent: true };
   } catch (err) {
-    console.error('[FCM] send error:', err.message);
+    logger.warn(`[FCM] send error: ${err.message}`);
     // If token is invalid/unregistered, clear it from DB
     if (
       err.code === 'messaging/registration-token-not-registered' ||
@@ -76,26 +75,7 @@ async function sendFCM(push_token, title, body, data = {}, priority = 'normal') 
     ) {
       return { sent: false, stale_token: true, error: err.message };
     }
-<<<<<<< HEAD
-
-    const { student_id, type, title, body, data = {} } = req.body;
-    if (!student_id || !title || !body) {
-      return res.status(400).json({ success: false, error: 'Missing required fields' });
-    }
-
-    const result = await db.query(
-      `INSERT INTO notifications (student_id, type, title, body, data)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-      [student_id, type || 'general', title, body, JSON.stringify(data)]
-    );
-
-    res.json({ success: true, notification_id: result.rows[0].id });
-  } catch (err) {
-    logger.error('Error sending notification:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-=======
     return { sent: false, error: err.message };
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
   }
 }
 
@@ -103,58 +83,7 @@ async function sendFCM(push_token, title, body, data = {}, priority = 'normal') 
 // Auth required (student or guardian)
 exports.registerToken = async (req, res) => {
   try {
-<<<<<<< HEAD
-    const { student_id } = req.user;
-
-    const result = await db.query(
-      `SELECT id, type, title, body, data, read, created_at
-       FROM notifications
-       WHERE student_id = $1
-       ORDER BY created_at DESC
-       LIMIT 20`,
-      [student_id]
-    );
-
-    const unreadCountResult = await db.query(
-      `SELECT COUNT(*) FROM notifications WHERE student_id = $1 AND read = FALSE`,
-      [student_id]
-    );
-    const unread_count = parseInt(unreadCountResult.rows[0].count, 10);
-
-    res.json({ success: true, notifications: result.rows, unread_count });
-  } catch (err) {
-    logger.error('Error fetching notifications:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-};
-
-// PUT /api/notifications/:id/read
-exports.markRead = async (req, res, next) => {
-  try {
-    const { student_id } = req.user;
-    const { id } = req.params;
-
-    await db.query(
-      `UPDATE notifications SET read = TRUE WHERE id = $1 AND student_id = $2`,
-      [id, student_id]
-    );
-
-    res.json({ success: true });
-  } catch (err) {
-    logger.error('Error marking notification read:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-};
-
-// POST /api/notifications/register-token
-exports.registerToken = async (req, res, next) => {
-  try {
-    const { student_id } = req.user;
-    const { push_token } = req.body;
-
-=======
     const { push_token, platform } = req.body;
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
     if (!push_token) {
       return res.status(400).json({ success: false, error: 'push_token is required' });
     }
@@ -169,10 +98,7 @@ exports.registerToken = async (req, res, next) => {
 
     res.json({ success: true, message: 'Push token registered', platform: platform || 'unknown' });
   } catch (err) {
-<<<<<<< HEAD
-    logger.error('Error registering push token:', err);
-=======
-    console.error('[registerToken]', err.message);
+    logger.error(`[registerToken] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -275,7 +201,7 @@ exports.sendNotification = async (req, res) => {
       ...(fcmResult.error ? { fcm_error: fcmResult.error } : {}),
     });
   } catch (err) {
-    console.error('[sendNotification]', err.message);
+    logger.error(`[sendNotification] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -366,7 +292,7 @@ exports.sendBulk = async (req, res) => {
           }
         });
       } catch (err) {
-        console.error('[sendBulk] FCM batch error:', err.message);
+        logger.error(`[sendBulk] FCM batch error: ${err.message}`);
         failure_count += batch.length;
       }
     }
@@ -388,7 +314,7 @@ exports.sendBulk = async (req, res) => {
       failure_count,
     });
   } catch (err) {
-    console.error('[sendBulk]', err.message);
+    logger.error(`[sendBulk] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -431,7 +357,7 @@ exports.getNotifications = async (req, res) => {
 
     res.json({ success: true, notifications, unread_count });
   } catch (err) {
-    console.error('[getNotifications]', err.message);
+    logger.error(`[getNotifications] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -455,7 +381,7 @@ exports.markRead = async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error('[markRead]', err.message);
+    logger.error(`[markRead] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -477,7 +403,7 @@ exports.markAllRead = async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error('[markAllRead]', err.message);
+    logger.error(`[markAllRead] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -503,7 +429,7 @@ exports.getPreferences = async (req, res) => {
 
     res.json({ success: true, preferences });
   } catch (err) {
-    console.error('[getPreferences]', err.message);
+    logger.error(`[getPreferences] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };
@@ -531,8 +457,7 @@ exports.updatePreferences = async (req, res) => {
 
     res.json({ success: true, message: 'Preferences updated' });
   } catch (err) {
-    console.error('[updatePreferences]', err.message);
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
+    logger.error(`[updatePreferences] ${err.message}`);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 };

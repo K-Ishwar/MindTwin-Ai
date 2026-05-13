@@ -1,11 +1,9 @@
-﻿const logger = require('../../../../shared/logger');\nconst db = require('../config/db');
+const logger = require('../../../../shared/logger');
+const db = require('../config/db');
 const redisClient = require('../config/redis');
 const axios = require('axios');
-<<<<<<< HEAD
 const { createCacheService, CACHE_KEYS, CACHE_TTL } = require('../../../../shared/cache/cacheService');
-=======
 const { sendNotification } = require('../../../shared/utils/notifyClient');
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://ai-engine:8000';
 const SCHEDULER_URL = process.env.SCHEDULER_SERVICE_URL || 'http://scheduler-service:3005';

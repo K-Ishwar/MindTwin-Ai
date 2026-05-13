@@ -1,4 +1,4 @@
-﻿const express    = require('express');
+const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
@@ -9,7 +9,7 @@ process.env.SERVICE_NAME = 'auth-service';
 const logger         = require('../../../shared/logger');
 const requestLogger  = require('../../../shared/middleware/requestLogger');
 const globalErrorHandler = require('../../../shared/middleware/errorHandler');
-const { metricsMiddleware } = require('../../../shared/metrics');\n
+const { metricsMiddleware } = require('../../../shared/metrics');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();

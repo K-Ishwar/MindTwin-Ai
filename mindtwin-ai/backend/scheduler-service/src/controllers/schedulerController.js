@@ -1,18 +1,12 @@
-<<<<<<< HEAD
-﻿'use strict';
+'use strict';
 
-
-const logger = require('../../../../shared/logger');\nconst axios = require('axios');
+const logger = require('../../../../shared/logger');
+const axios = require('axios');
 const db    = require('../config/db');
 const svc   = require('../utils/serviceClients');
 const redis = require('../config/redis');
 const { createCacheService, CACHE_KEYS, CACHE_TTL } = require('../../../../shared/cache/cacheService');
-=======
-const axios = require('axios');
-const db = require('../config/db');
-const svc = require('../utils/serviceClients');
 const { sendNotification } = require('../../../shared/utils/notifyClient');
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
 const PROFILE_SERVICE_URL = process.env.PROFILE_SERVICE_URL || 'http://profile-service:3002';
 const AI_ENGINE_URL       = process.env.AI_ENGINE_URL       || 'http://ai-engine:8000';
@@ -399,30 +393,17 @@ const replan = async (req, res, next) => {
     );
 
     if (reason === 'gap_detected') {
-<<<<<<< HEAD
-      try {
-        await axios.post(`${process.env.NOTIFICATION_SERVICE_URL || 'http://notification-service:3007'}/api/notifications/send`, {
-          student_id,
-          type: 'plan_update',
-          title: 'Study Plan Updated',
-          body: 'Your study plan has been updated based on your quiz results',
-          data: { gap_topic_ids }
-        }, { headers: { 'x-api-key': process.env.INTERNAL_API_KEY || 'internal-secret' }});
-      } catch (e) {
-        logger.warn('Failed to send notification:', e.message);
-      }
-    }
-
-    // Invalidate plan and today's sessions caches â€” new plan was generated
-    await cache.invalidateMany([
-      CACHE_KEYS.ACTIVE_PLAN(student_id),
-      CACHE_KEYS.TODAY_SESSIONS(student_id),
-    ]);
-=======
+    if (reason === 'gap_detected') {
       sendNotification('student', student_id, 'plan_updated', {}, { gap_topic_ids });
     } else if (reason === 'stress_high') {
       sendNotification('student', student_id, 'plan_updated');
     }
+
+    // Invalidate plan and today's sessions caches — new plan was generated
+    await cache.invalidateMany([
+      CACHE_KEYS.ACTIVE_PLAN(student_id),
+      CACHE_KEYS.TODAY_SESSIONS(student_id),
+    ]);
 
     // Check for upcoming exams within 7 days and fire exam_week notification
     try {
@@ -441,7 +422,6 @@ const replan = async (req, res, next) => {
         });
       }
     } catch (_) {}
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
 
     res.json({ success: true, reason, schedule, coverage_stats, warnings });
   } catch (err) {

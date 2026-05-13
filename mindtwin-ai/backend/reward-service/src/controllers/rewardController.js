@@ -1,18 +1,14 @@
-<<<<<<< HEAD
-﻿'use strict';
-=======
-const db = require('../config/db');
-const { sendNotification } = require('../../../shared/utils/notifyClient');
->>>>>>> cb4458a60e96d61275eb8dbf65c93cda4221c664
+'use strict';
 
-
-const logger = require('../../../../shared/logger');\nconst db    = require('../config/db');
+const logger = require('../../../../shared/logger');
+const db    = require('../config/db');
 const redis = require('../config/redis');
+const { sendNotification } = require('../../../shared/utils/notifyClient');
 const { createCacheService, CACHE_KEYS, CACHE_TTL } = require('../../../../shared/cache/cacheService');
 
 const cache = createCacheService(redis);
 
-// â”€â”€ Token award table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ──────────────────────────────────────────────────────────────────────────────────
 // Maps action + context conditions to { tokens, social_mins }
 const AWARD_TABLE = [
   // Session complete â€” checked in order (longer first for bonus)
