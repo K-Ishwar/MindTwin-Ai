@@ -1,0 +1,30 @@
+# Environment variables & secrets
+.env
+.env.prod
+*.pem
+*.key
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# AI Coding Agent configs & spec files (vibecoding traces)
+.kiro/
+
+# Setup / configuration scripts not needed in repo
+setup.js
+
+# Node / Build directories
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
